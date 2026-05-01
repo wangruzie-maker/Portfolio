@@ -740,7 +740,7 @@ window.portfolioWorks = [
     timeline: true,
     accent: "lime",
     coverUrl: coverMap.portfolioArchive,
-    pdfUrl: "https://github.com/wduan1212-rgb/Portfolio/releases/download/site-assets/early-portfolio-2024.pdf",
+    pdfUrl: "https://tcndqnj035ys.feishu.cn/docx/GykwdzlS8oBsLrx2TO4cbVmFnbg?from=from_copylink",
     videoUrl: "",
     embedUrl: "",
     videoType: "none",

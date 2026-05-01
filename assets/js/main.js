@@ -229,6 +229,7 @@
   function archiveItem(work, pdf = false) {
     if (pdf) {
       const pdfHref = work.pdfUrl || `case-study.html?id=${encodeURIComponent(work.id)}`;
+      const pdfButtonLabel = /\.pdf(\?.*)?$/i.test(pdfHref) ? "Preview PDF<br>预览 PDF" : "Open Portfolio<br>打开作品集";
       return `
         <article class="archive-card pdf-card reveal">
           ${visualMarkup(work)}
@@ -237,7 +238,7 @@
             <h3>${escapeHTML(work.title)}<br><span>${escapeHTML(work.titleCn)}</span></h3>
             <p>${escapeHTML(work.summaryCn)}</p>
           </div>
-          <a class="button" href="${escapeHTML(pdfHref)}"${work.pdfUrl ? ' target="_blank" rel="noopener"' : ""}>Preview PDF<br>预览 PDF</a>
+          <a class="button" href="${escapeHTML(pdfHref)}"${work.pdfUrl ? ' target="_blank" rel="noopener"' : ""}>${pdfButtonLabel}</a>
         </article>
       `;
     }
