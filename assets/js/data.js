@@ -727,15 +727,15 @@ window.portfolioWorks = [
     id: "portfolio-2024-pdf",
     order: 50,
     weight: "Archive",
-    title: "Portfolio Archive 2024.pdf",
-    titleCn: "2024 PDF 作品集归档",
+    title: "Portfolio Archive 2024",
+    titleCn: "2024 作品集归档",
     year: 2024,
-    category: "PDF Archive",
-    categoryCn: "PDF 归档",
+    category: "Portfolio Archive",
+    categoryCn: "作品集归档",
     type: "pdf-archive",
-    format: "PDF",
+    format: "Link",
     duration: "Archive",
-    tags: ["PDF", "Foundation", "2024"],
+    tags: ["Portfolio", "Foundation", "2024"],
     featured: false,
     timeline: true,
     accent: "lime",
@@ -744,12 +744,12 @@ window.portfolioWorks = [
     videoUrl: "",
     embedUrl: "",
     videoType: "none",
-    recommendedVideoCount: "1 PDF",
+    recommendedVideoCount: "1 portfolio link",
     platform: "Portfolio Foundation",
     role: "早期 AIGC 与基础视觉归档",
     tools: "Visual Design / Layout",
     summary: "The 2024 foundation portfolio archive.",
-    summaryCn: "2024 PDF 作品集归档，用于呈现早期 AIGC 和基础视觉能力。",
+    summaryCn: "2024 作品集归档，用于呈现早期 AIGC 和基础视觉能力。",
     goal: "Keep the foundation layer visible but compact.",
     strategy: "Premium black portfolio-book treatment, simple WD mark, and cyan edge light.",
     value: "早期作品集 PDF 归档。"
@@ -767,7 +767,7 @@ window.portfolioCategories = [
   { key: "Game Visuals", cn: "游戏视觉", icon: "game", summary: "Game prototypes, competition demos, and fantasy visual projects." },
   { key: "AI Short Films", cn: "AI 短片", icon: "film", summary: "Narrative AI short films and 2025 fantasy exploration." },
   { key: "Exhibition Boards", cn: "展板作品", icon: "board", summary: "Competition boards and supporting static archive." },
-  { key: "PDF Archive", cn: "PDF 归档", icon: "pdf", summary: "The compact 2024 foundation portfolio archive." }
+  { key: "Portfolio Archive", cn: "作品集归档", icon: "pdf", summary: "The compact 2024 foundation portfolio archive." }
 ];
 
 function inferOrientation(work) {
