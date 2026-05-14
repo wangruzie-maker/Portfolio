@@ -435,16 +435,16 @@
     const loopCopies = (items) => (items.length > 1 ? Array.from({ length: 4 }, () => items).flat() : items);
 
     return `
-      <div class="industry-timeline reveal" aria-label="Industry project timelines">
+      <div class="industry-timeline" aria-label="Industry project timelines">
         <div class="industry-timeline-head">
           <span>Industry Timelines</span>
           <em>Games · E-commerce · APP · Vibe Coding</em>
           <strong>${totalCount} project series</strong>
         </div>
         <div class="industry-track-list">
-          ${groups.map((group) => {
+          ${groups.map((group, index) => {
             return `
-              <section class="industry-track ${escapeHTML(group.className)}" aria-label="${escapeHTML(group.title)}">
+              <section class="industry-track ${escapeHTML(group.className)} reveal${index ? ` delay-${Math.min(index, 3)}` : ""}" data-reveal-repeat aria-label="${escapeHTML(group.title)}">
                 <div class="industry-track-head">
                   <div>
                     <span>${escapeHTML(group.eyebrow)}</span>
@@ -789,12 +789,15 @@
       items.forEach((item) => item.classList.add("is-visible"));
       return;
     }
+    const replayItems = new Set($$("[data-reveal-repeat]"));
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("is-visible");
-            observer.unobserve(entry.target);
+            if (!replayItems.has(entry.target)) observer.unobserve(entry.target);
+          } else if (replayItems.has(entry.target)) {
+            entry.target.classList.remove("is-visible");
           }
         });
       },
