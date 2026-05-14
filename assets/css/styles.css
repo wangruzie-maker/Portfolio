@@ -4604,6 +4604,308 @@ video.embed-slot {
   }
 }
 
+/* Industry timelines: four horizontal waterfall tracks */
+.industry-timeline {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(116, 238, 255, 0.2);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(54, 230, 244, 0.14), transparent 24rem),
+    radial-gradient(circle at 92% 18%, rgba(163, 236, 96, 0.1), transparent 18rem),
+    linear-gradient(180deg, rgba(7, 18, 24, 0.84), rgba(2, 8, 12, 0.64));
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+}
+
+.industry-timeline-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 18px;
+  align-items: end;
+  padding: 22px 24px;
+  border-bottom: 1px solid rgba(116, 238, 255, 0.14);
+}
+
+.industry-timeline-head span {
+  color: #f6fdff;
+  font-size: 32px;
+  line-height: 1.05;
+}
+
+.industry-timeline-head em {
+  grid-column: 1;
+  color: var(--muted);
+  font-style: normal;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.industry-timeline-head strong {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.industry-track-list {
+  display: grid;
+  gap: 20px;
+  padding: 20px;
+}
+
+.industry-track {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(116, 238, 255, 0.15);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01)),
+    rgba(3, 9, 12, 0.7);
+}
+
+.industry-track-game {
+  --track-accent: var(--lime);
+}
+
+.industry-track-commerce {
+  --track-accent: #ffd166;
+}
+
+.industry-track-app {
+  --track-accent: var(--cyan);
+}
+
+.industry-track-vibe {
+  --track-accent: #9f7cff;
+}
+
+.industry-track-head {
+  display: grid;
+  grid-template-columns: minmax(170px, 0.42fr) minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: end;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid rgba(116, 238, 255, 0.12);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--track-accent) 12%, transparent), transparent 58%),
+    rgba(255, 255, 255, 0.018);
+}
+
+.industry-track-head span {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--track-accent);
+  font-family: var(--font-en-display);
+  font-size: 12px;
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.industry-track-head h3 {
+  margin: 0;
+  color: #f8fdff;
+  font-family: var(--font-cn-title);
+  font-size: 27px;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+.industry-track-head p {
+  margin: 0;
+  color: rgba(225, 242, 245, 0.84);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.industry-track-head strong {
+  color: var(--track-accent);
+  font-family: var(--font-en-display);
+  font-size: 12px;
+  font-style: italic;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.industry-marquee {
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 16px 0 18px;
+  scrollbar-width: none;
+  touch-action: pan-x;
+}
+
+.industry-marquee::-webkit-scrollbar {
+  display: none;
+}
+
+.industry-marquee::before,
+.industry-marquee::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 5;
+  width: 72px;
+  pointer-events: none;
+}
+
+.industry-marquee::before {
+  left: 0;
+  background: linear-gradient(90deg, rgba(3, 9, 12, 0.96), rgba(3, 9, 12, 0));
+}
+
+.industry-marquee::after {
+  right: 0;
+  background: linear-gradient(270deg, rgba(3, 9, 12, 0.96), rgba(3, 9, 12, 0));
+}
+
+.industry-marquee-row {
+  width: max-content;
+  display: flex;
+  gap: 16px;
+  padding: 0 20px 14px;
+  will-change: transform;
+  animation: industryMarquee var(--marquee-duration, 54s) linear infinite;
+}
+
+.industry-marquee-row.is-offset {
+  padding-left: 96px;
+  animation-duration: calc(var(--marquee-duration, 54s) + 10s);
+}
+
+.industry-marquee-row.is-static {
+  animation: none;
+}
+
+.industry-track:hover .industry-marquee-row,
+.industry-track:focus-within .industry-marquee-row,
+.industry-marquee.is-dragging .industry-marquee-row {
+  animation-play-state: paused;
+}
+
+@keyframes industryMarquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.industry-marquee .timeline-project-card {
+  width: 315px;
+  height: 324px;
+  flex: 0 0 315px;
+}
+
+.industry-marquee .timeline-project-card.orientation-vertical {
+  width: 230px;
+  height: 362px;
+  flex-basis: 230px;
+}
+
+.industry-marquee .project-cover-wrap {
+  height: 172px;
+  flex-basis: 172px;
+}
+
+.industry-marquee .timeline-project-card.orientation-vertical .project-cover-wrap {
+  height: 212px;
+  flex-basis: 212px;
+}
+
+.industry-marquee .project-info {
+  height: 152px;
+  flex-basis: 152px;
+  padding: 14px;
+}
+
+.industry-marquee .project-title {
+  font-size: 16px;
+}
+
+.industry-marquee .project-subtitle {
+  font-size: 12px;
+  line-height: 1.42;
+}
+
+.industry-marquee .timeline-project-card.has-actions .project-info {
+  padding-bottom: 54px;
+}
+
+.industry-marquee .project-action-link {
+  min-height: 32px;
+  left: 14px;
+  right: 14px;
+  bottom: 13px;
+}
+
+@media (max-width: 920px) {
+  .industry-timeline-head,
+  .industry-track-head {
+    grid-template-columns: 1fr;
+  }
+
+  .industry-timeline-head strong {
+    grid-row: auto;
+    grid-column: auto;
+  }
+
+  .industry-track-head h3 {
+    font-size: 24px;
+  }
+
+  .industry-track-head strong {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 640px) {
+  .industry-track-list {
+    padding: 14px;
+  }
+
+  .industry-timeline-head {
+    padding: 18px;
+  }
+
+  .industry-timeline-head span {
+    font-size: 26px;
+  }
+
+  .industry-marquee::before,
+  .industry-marquee::after {
+    width: 34px;
+  }
+
+  .industry-marquee .timeline-project-card {
+    width: 276px;
+    flex-basis: 276px;
+  }
+
+  .industry-marquee .timeline-project-card.orientation-vertical {
+    width: 214px;
+    flex-basis: 214px;
+  }
+
+  .industry-marquee-row.is-offset {
+    padding-left: 52px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .industry-marquee-row {
+    animation: none;
+  }
+}
+
 /* V10 typography and portfolio archive refinements */
 body,
 .brand-subtitle,
@@ -4611,7 +4913,8 @@ body,
 .card-body p,
 .archive-card p,
 .project-subtitle,
-.timeline-column-header p,
+  .timeline-column-header p,
+  .industry-track-head p,
 .year-note,
 .about-copy p,
 .contact-list,
@@ -4632,7 +4935,8 @@ body,
 .archive-card h3,
 .work-card .card-body h3,
 .works-section-head h3,
-.timeline-2026-head span,
+  .timeline-2026-head span,
+  .industry-timeline-head span,
 .project-title {
   font-family: var(--font-en-display);
   font-style: italic;
@@ -4644,7 +4948,8 @@ body,
 .work-card h3 span,
 .archive-card h3 span,
 .year-note strong,
-.timeline-column-header h4,
+  .timeline-column-header h4,
+  .industry-track-head h3,
 .filter-button,
 .project-tags span,
 .pill,
