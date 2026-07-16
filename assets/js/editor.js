@@ -5,7 +5,7 @@
 (function () {
   "use strict";
 
-  const STORAGE_KEY = "resume-simple-edits-v1";
+  const STORAGE_KEY = "resume-simple-edits-v2";
   const MAX_IMAGE_BYTES = 900 * 1024;
 
   function loadEdits() {
