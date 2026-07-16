@@ -67,48 +67,78 @@
   }
 
   function initSiteConfig() {
-    $$(".brand-mark").forEach((mark) => {
-      mark.innerHTML = `<img src="assets/logo/wd-logo.png" alt="WD" width="44" height="44">`;
-      mark.classList.add("brand-mark-image");
-    });
+    const resumeMode = document.body?.dataset?.resumeMode === "true";
 
-    setText("[data-site-email]", site.email || "");
+    if (!resumeMode) {
+      $$(".brand-mark").forEach((mark) => {
+        mark.innerHTML = `<img src="assets/logo/wd-logo.png" alt="WD" width="44" height="44">`;
+        mark.classList.add("brand-mark-image");
+      });
+    }
+
+    $$("[data-site-email]").forEach((node) => {
+      node.textContent = site.email || "";
+      if (node.tagName === "A" && site.email) {
+        node.setAttribute("href", `mailto:${site.email}`);
+      }
+    });
     setText("[data-site-location]", site.location || "");
     setText("[data-site-wechat]", site.wechat || "");
+    $$("[data-site-name]").forEach((node) => { node.textContent = site.name || site.nameZh || ""; });
+    $$("[data-site-tagline]").forEach((node) => { node.textContent = site.tagline || site.taglineZh || ""; });
+    $$("[data-site-role]").forEach((node) => { node.textContent = site.role || ""; });
+    $$("[data-site-intro]").forEach((node) => { node.textContent = site.intro || ""; });
+    $$("[data-site-summary]").forEach((node) => { node.textContent = site.summary || ""; });
+    $$("[data-site-status]").forEach((node) => { node.textContent = site.status || ""; });
+    $$("[data-site-focus]").forEach((node) => { node.textContent = site.focus || ""; });
+    $$("[data-site-contact-lead]").forEach((node) => { node.textContent = site.contactLead || ""; });
+
+    const tagRoots = $$("[data-resume-tags], [data-resume-tags-secondary]");
+    if (tagRoots.length && Array.isArray(site.tags)) {
+      tagRoots.forEach((root) => {
+        root.innerHTML = site.tags.map((tag) => `<span>${escapeHTML(tag)}</span>`).join("");
+      });
+    }
 
     $$("[data-feishu-link]").forEach((link) => {
-      link.setAttribute("href", site.feishuUrl || "#");
-      if (site.feishuUrl && site.feishuUrl !== "#") {
-        link.setAttribute("target", "_blank");
-        link.setAttribute("rel", "noopener noreferrer");
+      if (isNavigableHref(site.feishuUrl)) {
+        const href = String(site.feishuUrl).trim();
+        link.setAttribute("href", href);
+        if (/^https?:\/\//i.test(href)) {
+          link.setAttribute("target", "_blank");
+          link.setAttribute("rel", "noopener noreferrer");
+        }
         link.removeAttribute("aria-disabled");
       } else {
+        link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+        link.addEventListener("click", (event) => event.preventDefault());
       }
-      link.addEventListener("click", (event) => {
-        if (!site.feishuUrl || site.feishuUrl === "#") event.preventDefault();
-      });
     });
 
     const socials = $("[data-socials]");
     if (socials) {
       socials.innerHTML = (site.socials || [])
         .map((social) => {
-          const href = social.url || "#";
-          const isExternal = /^https?:\/\//i.test(href);
-          const linkState = !social.url || social.url === "#" ? ' aria-disabled="true"' : "";
-          const externalAttrs = isExternal ? ' target="_blank" rel="noopener noreferrer"' : "";
+          const href = isNavigableHref(social.url) ? String(social.url).trim() : "";
+          if (!href) {
+            return `
+              <span class="social-link social-icon-link is-static" aria-label="${escapeHTML(social.name)}">
+                <img src="${escapeHTML(social.icon)}" alt="" width="18" height="18">
+                <span>${escapeHTML(social.name)}</span>
+              </span>
+            `;
+          }
+          const isExternal = /^https?:\/\//i.test(href) || href.startsWith("mailto:");
+          const externalAttrs = /^https?:\/\//i.test(href) ? ' target="_blank" rel="noopener noreferrer"' : "";
           return `
-            <a class="social-link social-icon-link" href="${escapeHTML(href)}" aria-label="${escapeHTML(social.name)}"${externalAttrs}${linkState}>
+            <a class="social-link social-icon-link" href="${escapeHTML(href)}" aria-label="${escapeHTML(social.name)}"${externalAttrs}>
               <img src="${escapeHTML(social.icon)}" alt="" width="18" height="18">
               <span>${escapeHTML(social.name)}</span>
             </a>
           `;
         })
         .join("");
-      $$("a[aria-disabled='true']", socials).forEach((link) => {
-        link.addEventListener("click", (event) => event.preventDefault());
-      });
     }
   }
 
@@ -158,11 +188,21 @@
       .join("");
   }
 
+  function isNavigableHref(href) {
+    if (href == null) return false;
+    const value = String(href).trim();
+    if (!value) return false;
+    if (value === "#" || value === "/" || /^javascript:/i.test(value)) return false;
+    return true;
+  }
+
   function mediaHref(work) {
     if (!work) return "";
-    if (work.externalUrl) return work.externalUrl;
+    const candidates = [work.externalUrl, work.link, work.href, work.pdfUrl];
+    for (const candidate of candidates) {
+      if (isNavigableHref(candidate)) return String(candidate).trim();
+    }
     if (work.videoUrl && /^https?:\/\//i.test(work.videoUrl)) return work.videoUrl;
-    if (work.pdfUrl) return work.pdfUrl;
     return "";
   }
 
@@ -179,8 +219,9 @@
 
   function workCard(work, options = {}) {
     const showSummary = options.summary !== false;
-    return `
-      <article class="work-card ${escapeHTML(work.type)} orientation-${escapeHTML(orientationOf(work))} layout-${escapeHTML(work.layout || "wide")} reveal" data-work-card data-category="${escapeHTML(work.category)}" data-year="${escapeHTML(work.year)}" data-accent="${escapeHTML(work.accent || "cyan")}">
+    const href = mediaHref(work);
+    const isExternal = /^https?:\/\//i.test(href);
+    const body = `
         <div class="card-visual">${visualActionMarkup(work, options)}</div>
         <div class="card-body">
           <div class="card-overline">
@@ -188,35 +229,51 @@
           </div>
           <h3>${escapeHTML(work.title)}<br><span>${escapeHTML(work.titleCn)}</span></h3>
           ${showSummary ? `<p>${escapeHTML(work.summaryCn)}</p>` : ""}
-          ${work.highResUrl ? `
+          ${work.highResUrl && isNavigableHref(work.highResUrl) ? `
             <div class="card-action-row">
               <a class="card-action-link" href="${escapeHTML(work.highResUrl)}" target="_blank" rel="noopener noreferrer">查看高清视频</a>
             </div>
           ` : ""}
         </div>
-      </article>
     `;
+    const className = `work-card ${escapeHTML(work.type)} orientation-${escapeHTML(orientationOf(work))} layout-${escapeHTML(work.layout || "wide")} reveal`;
+    const attrs = `data-work-card data-work-id="${escapeHTML(work.id)}" data-category="${escapeHTML(work.category)}" data-year="${escapeHTML(work.year)}" data-accent="${escapeHTML(work.accent || "cyan")}"`;
+    if (!href) {
+      return `<article class="${className} is-static" ${attrs}>${body}</article>`;
+    }
+    return `<a class="${className}" href="${escapeHTML(href)}" ${attrs}${isExternal ? ' target="_blank" rel="noopener noreferrer"' : ""}>${body}</a>`;
   }
 
   function renderHighlights() {
     const root = $("[data-highlights]");
     if (!root) return;
+    const resumeMode = document.body?.dataset?.resumeMode === "true";
     const keys = ["游戏", "电商", "APP", "Vibe Coding"];
     root.innerHTML = categories
       .filter((category) => keys.includes(category.key))
       .map((category) => {
         const firstWork = works.find((work) => work.category === category.key);
-        return `
-          <a class="metric-card reveal" href="works.html?category=${encodeURIComponent(category.key)}" data-accent="${escapeHTML(firstWork?.accent || "cyan")}">
+        const configured = isNavigableHref(category.link) ? String(category.link).trim() : "";
+        const href = configured || (!resumeMode ? `works.html?category=${encodeURIComponent(category.key)}` : "");
+        const action = href ? (resumeMode ? "Open Link" : "View Works") : "Text Card";
+        const isExternal = /^https?:\/\//i.test(href);
+        const inner = `
             <div>
               <div class="metric-top">
                 <span class="metric-icon" data-icon="${escapeHTML(category.icon)}" aria-hidden="true"></span>
-                <span class="count">${String(countCategory(category.key)).padStart(2, "0")} Series</span>
+                <span class="count">${String(countCategory(category.key)).padStart(2, "0")} ${resumeMode ? "Items" : "Series"}</span>
               </div>
               <h3>${escapeHTML(category.cn || category.key)}</h3>
               <p>${escapeHTML(category.summary)}</p>
             </div>
-            <span class="text-link">View Works</span>
+            <span class="text-link">${action}</span>
+        `;
+        if (!isNavigableHref(href)) {
+          return `<article class="metric-card reveal is-static" data-category-key="${escapeHTML(category.key)}" data-accent="${escapeHTML(firstWork?.accent || "cyan")}">${inner}</article>`;
+        }
+        return `
+          <a class="metric-card reveal" href="${escapeHTML(href)}" data-category-key="${escapeHTML(category.key)}" data-accent="${escapeHTML(firstWork?.accent || "cyan")}"${isExternal ? ' target="_blank" rel="noopener noreferrer"' : ""}>
+            ${inner}
           </a>
         `;
       })
@@ -311,6 +368,7 @@
   }
 
   function timelineCoverMarkup(work) {
+    if (!work.coverUrl && !work.coverVideoUrl) return "";
     const orientation = orientationOf(work);
     return `
       <div class="project-cover-wrap is-${escapeHTML(orientation)}">
@@ -329,28 +387,31 @@
         ${labels.map((label) => `<span>${escapeHTML(label)}</span>`).join("")}
       </div>
     `;
+    const textOnly = !work.coverUrl && !work.coverVideoUrl;
     const inner = `
       ${timelineCoverMarkup(work)}
       <div class="project-info">
         <div>
           <h4 class="project-title">${escapeHTML(work.title)}</h4>
           <p class="project-subtitle">${escapeHTML(work.titleCn || work.summaryCn || "")}</p>
+          ${textOnly && work.summaryCn ? `<p class="project-summary">${escapeHTML(work.summaryCn)}</p>` : ""}
         </div>
         ${tagLine}
       </div>
     `;
-    const className = `timeline-project-card orientation-${escapeHTML(orientationOf(work))}`;
-    if (!href) return `<article class="${className}">${inner}</article>`;
+    const className = `timeline-project-card orientation-${escapeHTML(orientationOf(work))}${textOnly ? " is-text-only" : ""}`;
+    const workAttr = ` data-work-id="${escapeHTML(work.id)}"`;
+    if (!href) return `<article class="${className}"${workAttr}>${inner}</article>`;
     const isExternal = /^https?:\/\//i.test(href);
     if (work.highResUrl) {
       return `
-        <article class="${className} has-actions">
+        <article class="${className} has-actions"${workAttr}>
           <a class="timeline-card-main" href="${escapeHTML(href)}"${isExternal ? ' target="_blank" rel="noopener noreferrer"' : ""} aria-label="Open ${escapeHTML(work.title)}">${inner}</a>
           <a class="project-action-link" href="${escapeHTML(work.highResUrl)}" target="_blank" rel="noopener noreferrer">查看高清视频</a>
         </article>
       `;
     }
-    return `<a class="${className}" href="${escapeHTML(href)}"${isExternal ? ' target="_blank" rel="noopener noreferrer"' : ""} aria-label="Open ${escapeHTML(work.title)}">${inner}</a>`;
+    return `<a class="${className}" href="${escapeHTML(href)}"${workAttr}${isExternal ? ' target="_blank" rel="noopener noreferrer"' : ""} aria-label="Open ${escapeHTML(work.title)}">${inner}</a>`;
   }
 
   function createDragonGameTimelineItem() {
@@ -374,72 +435,85 @@
   function renderIndustryTimeline() {
     const byIds = (ids) => ids.map(findWork).filter(Boolean);
     const withSubTag = (work, subTag) => ({ ...work, timelineSubTag: subTag });
-    const gameItems = [
-      ...byIds(["xundao-daqian"]).map((work) => withSubTag(work, "游戏视觉")),
-      ...byIds(["dragon-covenant-finale"]).map((work) => withSubTag(work, "龙之契")),
-      ...byIds(["coa-game-showcase"]).map((work) => withSubTag(work, "CoA")),
-      ...byIds(["dragon-covenant-undersea", "dragon-covenant-dragon"]).map((work) => withSubTag(work, "2025 龙之契"))
-    ];
-    const commerceItems = byIds(["ebenb-cooling-pants", "varta-battery-campaign", "tt-fashion-series", "arthur-andrew-medical"])
-      .map((work) => withSubTag(work, "商业广告"));
-    const appItems = [
-      ...byIds(["vivago-overseas-campaign", "alipay-overseas-project", "baidu-cloud-doorway", "trip-uca-travel"]).map((work) => withSubTag(work, "APP")),
-      ...byIds(["asha-easy-cash-app", "brazil-local-campaign", "undersea-demo"]).map((work) => withSubTag(work, "移动场景"))
-    ];
-    const vibeCodingItems = [
-      ...byIds(["starfield-frontline-game"]).map((work) => withSubTag(work, "游戏 Demo")),
-      ...byIds(["ai-creative-tool-system", "self-operated-production-system"]).map((work) => withSubTag(work, "工具类")),
-      ...byIds(["vibe-coding-guide", "renpy-study-guide"]).map((work) => withSubTag(work, "教学类"))
-    ];
+    const resumeMode = document.body?.dataset?.resumeMode === "true";
 
-    const groups = [
-      {
-        id: "game",
-        className: "industry-track-game",
-        title: "游戏",
-        eyebrow: "Game Direction",
-        description: "游戏视觉、角色 Campaign、龙之契系列与互动展示入口。",
-        duration: 54,
-        items: gameItems
-      },
-      {
-        id: "ecommerce",
-        className: "industry-track-commerce",
-        title: "电商",
-        eyebrow: "E-commerce",
-        description: "服饰、消费品、健康品和产品广告的系列化投放案例。",
-        duration: 44,
-        items: commerceItems
-      },
-      {
-        id: "app",
-        className: "industry-track-app",
-        title: "APP",
-        eyebrow: "APP Promo",
-        description: "支付、旅行、贷款、出行和移动应用相关传播项目。",
-        duration: 62,
-        items: appItems
-      },
-      {
-        id: "vibe",
-        className: "industry-track-vibe",
-        title: "Vibe Coding",
-        eyebrow: "AI Coding",
-        description: "网站、工具、游戏 Demo 与教学型网页项目。",
-        duration: 58,
-        items: vibeCodingItems
-      }
-    ];
+    let groups;
+    if (resumeMode && Array.isArray(window.resumeTracks) && window.resumeTracks.length) {
+      groups = window.resumeTracks.map((track) => ({
+        ...track,
+        items: byIds(track.itemIds || []).map((work) => withSubTag(work, work.timelineSubTag || track.title))
+      }));
+    } else {
+      const gameItems = [
+        ...byIds(["xundao-daqian"]).map((work) => withSubTag(work, "游戏视觉")),
+        ...byIds(["dragon-covenant-finale"]).map((work) => withSubTag(work, "龙之契")),
+        ...byIds(["coa-game-showcase"]).map((work) => withSubTag(work, "CoA")),
+        ...byIds(["dragon-covenant-undersea", "dragon-covenant-dragon"]).map((work) => withSubTag(work, "2025 龙之契"))
+      ];
+      const commerceItems = byIds(["ebenb-cooling-pants", "varta-battery-campaign", "tt-fashion-series", "arthur-andrew-medical"])
+        .map((work) => withSubTag(work, "商业广告"));
+      const appItems = [
+        ...byIds(["vivago-overseas-campaign", "alipay-overseas-project", "baidu-cloud-doorway", "trip-uca-travel"]).map((work) => withSubTag(work, "APP")),
+        ...byIds(["asha-easy-cash-app", "brazil-local-campaign", "undersea-demo"]).map((work) => withSubTag(work, "移动场景"))
+      ];
+      const vibeCodingItems = [
+        ...byIds(["starfield-frontline-game"]).map((work) => withSubTag(work, "游戏 Demo")),
+        ...byIds(["ai-creative-tool-system", "self-operated-production-system"]).map((work) => withSubTag(work, "工具类")),
+        ...byIds(["vibe-coding-guide", "renpy-study-guide"]).map((work) => withSubTag(work, "教学类"))
+      ];
+
+      groups = [
+        {
+          id: "game",
+          className: "industry-track-game",
+          title: "游戏",
+          eyebrow: "Game Direction",
+          description: "游戏视觉、角色 Campaign、龙之契系列与互动展示入口。",
+          duration: 54,
+          items: gameItems
+        },
+        {
+          id: "ecommerce",
+          className: "industry-track-commerce",
+          title: "电商",
+          eyebrow: "E-commerce",
+          description: "服饰、消费品、健康品和产品广告的系列化投放案例。",
+          duration: 44,
+          items: commerceItems
+        },
+        {
+          id: "app",
+          className: "industry-track-app",
+          title: "APP",
+          eyebrow: "APP Promo",
+          description: "支付、旅行、贷款、出行和移动应用相关传播项目。",
+          duration: 62,
+          items: appItems
+        },
+        {
+          id: "vibe",
+          className: "industry-track-vibe",
+          title: "Vibe Coding",
+          eyebrow: "AI Coding",
+          description: "网站、工具、游戏 Demo 与教学型网页项目。",
+          duration: 58,
+          items: vibeCodingItems
+        }
+      ];
+    }
 
     const totalCount = groups.reduce((sum, group) => sum + group.items.length, 0);
     const loopCopies = (items) => (items.length > 1 ? Array.from({ length: 4 }, () => items).flat() : items);
+    const headEye = resumeMode ? "Education · Experience" : "Games · E-commerce · APP · Vibe Coding";
+    const headLabel = resumeMode ? "Resume Timelines" : "Industry Timelines";
+    const headUnit = resumeMode ? "career tracks" : "project series";
 
     return `
-      <div class="industry-timeline" aria-label="Industry project timelines">
+      <div class="industry-timeline" aria-label="${escapeHTML(headLabel)}">
         <div class="industry-timeline-head">
-          <span>Industry Timelines</span>
-          <em>Games · E-commerce · APP · Vibe Coding</em>
-          <strong>${totalCount} project series</strong>
+          <span>${escapeHTML(headLabel)}</span>
+          <em>${escapeHTML(headEye)}</em>
+          <strong>${totalCount} ${escapeHTML(headUnit)}</strong>
         </div>
         <div class="industry-track-list">
           ${groups.map((group, index) => {
