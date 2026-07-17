@@ -47,7 +47,7 @@
       if (seen.has(w.id)) return false;
       seen.add(w.id);
       return true;
-    }).slice(0, 6);
+    }).slice(0, 8);
   }
 
   function setText(sel, value) {
@@ -174,6 +174,70 @@
         return `<article class="case-card is-static reveal${linkClass}" data-work-id="${escapeHTML(work.id)}">${body}</article>`;
       })
       .join("");
+  }
+
+  let marqueeRaf = 0;
+
+  function setupCaseMarquee() {
+    const wrap = $("[data-case-marquee]");
+    const track = $("[data-case-grid]");
+    if (!wrap || !track) return;
+
+    if (marqueeRaf) {
+      cancelAnimationFrame(marqueeRaf);
+      marqueeRaf = 0;
+    }
+    track.style.transform = "";
+
+    const cards = Array.from(track.children).filter((node) => !node.hasAttribute("data-marquee-clone"));
+    Array.from(track.querySelectorAll("[data-marquee-clone]")).forEach((node) => node.remove());
+
+    if (reduceMotion || cards.length < 4) {
+      wrap.classList.remove("is-marquee");
+      return;
+    }
+    wrap.classList.add("is-marquee");
+
+    // Seamless loop: clone the card set once, strip editing hooks from clones.
+    cards.forEach((card) => {
+      const clone = card.cloneNode(true);
+      clone.setAttribute("data-marquee-clone", "");
+      clone.setAttribute("aria-hidden", "true");
+      clone.querySelectorAll("[data-edit-text], [data-edit-work]").forEach((node) => {
+        node.removeAttribute("data-edit-text");
+        node.removeAttribute("data-edit-work");
+        node.removeAttribute("contenteditable");
+      });
+      clone.querySelectorAll("[data-edit-link]").forEach((node) => node.removeAttribute("data-edit-link"));
+      clone.querySelectorAll("[data-image-upload]").forEach((node) => node.remove());
+      track.appendChild(clone);
+    });
+
+    let offset = 0;
+    let last = null;
+    const SPEED = 32; // px per second
+
+    if (!wrap.dataset.marqueeBound) {
+      wrap.dataset.marqueeBound = "1";
+      wrap.__marqueePaused = false;
+      wrap.addEventListener("mouseenter", () => { wrap.__marqueePaused = true; });
+      wrap.addEventListener("mouseleave", () => { wrap.__marqueePaused = false; });
+      wrap.addEventListener("touchstart", () => { wrap.__marqueePaused = true; }, { passive: true });
+      wrap.addEventListener("touchend", () => { wrap.__marqueePaused = false; }, { passive: true });
+    }
+
+    function loop(now) {
+      marqueeRaf = requestAnimationFrame(loop);
+      if (last === null) { last = now; return; }
+      const dt = (now - last) / 1000;
+      last = now;
+      if (wrap.__marqueePaused || document.body.classList.contains("is-editing")) return;
+      const half = track.scrollWidth / 2;
+      if (!half) return;
+      offset = (offset + SPEED * dt) % half;
+      track.style.transform = `translate3d(${-offset.toFixed(2)}px, 0, 0)`;
+    }
+    marqueeRaf = requestAnimationFrame(loop);
   }
 
   function renderJourney() {
@@ -390,6 +454,7 @@
     hydrateSite();
     splitHeroName();
     renderGrid();
+    setupCaseMarquee();
     renderJourney();
     setupReveal();
     bindEditor();

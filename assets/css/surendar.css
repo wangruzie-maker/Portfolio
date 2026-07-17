@@ -221,6 +221,163 @@ main { position: relative; z-index: 1; }
   pointer-events: none;
 }
 
+/* —— Spiral staircase hero object —— */
+.sx-spiral {
+  position: absolute;
+  right: 10vw;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(42vw, 580px);
+  height: min(80vh, 700px);
+  z-index: 5;
+  perspective: 1200px;
+  pointer-events: none;
+}
+
+.spiral-scene {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(12deg);
+}
+
+.spiral-axis {
+  position: absolute;
+  left: 50%;
+  top: 9%;
+  bottom: 9%;
+  width: 1px;
+  transform: translateX(-0.5px);
+  background: linear-gradient(180deg, transparent, rgba(233, 184, 114, 0.35) 18%, rgba(233, 184, 114, 0.35) 82%, transparent);
+}
+
+.spiral-base {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  width: 62%;
+  height: 10%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(233, 184, 114, 0.12), transparent 68%);
+  filter: blur(2px);
+}
+
+.spiral-step {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-style: preserve-3d;
+  transform-origin: left center;
+  will-change: transform, opacity;
+}
+
+.spiral-tread {
+  position: relative;
+  width: clamp(104px, 11vw, 152px);
+  height: 4px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, rgba(245, 242, 236, 0.05), rgba(233, 184, 114, 0.92) 45%, rgba(245, 242, 236, 0.55));
+  box-shadow: 0 0 18px rgba(233, 184, 114, 0.3);
+}
+
+.spiral-tread::after {
+  content: "";
+  position: absolute;
+  right: -3px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  background: rgba(245, 242, 236, 0.9);
+  box-shadow: 0 0 12px rgba(233, 184, 114, 0.8);
+}
+
+.spiral-label {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, calc(-100% - 12px));
+  display: grid;
+  gap: 3px;
+  justify-items: center;
+  text-align: center;
+  white-space: nowrap;
+  z-index: 130;
+  will-change: opacity;
+}
+
+.spiral-year {
+  font-family: var(--sx-mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: var(--sx-gold);
+}
+
+.spiral-word {
+  font-family: var(--sx-serif-cn);
+  font-size: clamp(13px, 1.25vw, 16px);
+  letter-spacing: 0.04em;
+  color: var(--sx-fg);
+}
+
+/* —— Keyword FX (ported from vue-bits) —— */
+/* ShinyText: gold shine sweep */
+.fx-shiny {
+  background-image: linear-gradient(120deg, rgba(245, 242, 236, 0.55) 0%, rgba(245, 242, 236, 0.55) 38%, #ffe9c4 50%, rgba(245, 242, 236, 0.55) 62%, rgba(245, 242, 236, 0.55) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: fx-shine 3.2s linear infinite;
+  animation-delay: calc(var(--fx-i, 0) * 0.35s);
+}
+
+@keyframes fx-shine {
+  0% { background-position: 150% center; }
+  100% { background-position: -50% center; }
+}
+
+/* BlurText: staggered blur-in (triggered by .is-in from JS) */
+.fx-blur {
+  opacity: 0;
+  filter: blur(10px);
+  transform: translateY(-10px);
+  transition: opacity 700ms var(--sx-ease), filter 700ms var(--sx-ease), transform 700ms var(--sx-ease);
+}
+.fx-blur.is-in {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+}
+
+/* DecryptedText: scramble handled in JS; keep mono-ish rhythm while decoding */
+.fx-decrypt {
+  font-variant-numeric: tabular-nums;
+}
+
+/* GradientText: flowing gradient fill */
+.fx-gradient {
+  background-image: linear-gradient(90deg, #e9b872, #f5f2ec, #9b968d, #e9b872);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: fx-flow 6s linear infinite;
+  animation-delay: calc(var(--fx-i, 0) * 0.4s);
+}
+
+@keyframes fx-flow {
+  0% { background-position: 0% center; }
+  100% { background-position: 300% center; }
+}
+
+@media (max-width: 900px) {
+  .sx-spiral { display: none; }
+}
+
 .sx-hero-inner {
   position: relative;
   z-index: 5;
@@ -267,6 +424,12 @@ main { position: relative; z-index: 1; }
   font-weight: 400;
   letter-spacing: -0.02em;
   line-height: 0.92;
+}
+
+.sx-name.is-single {
+  font-size: clamp(2.9rem, 6vw, 5.6rem);
+  letter-spacing: 0.06em;
+  line-height: 1.05;
 }
 
 .sx-name-line {
@@ -634,6 +797,28 @@ main { position: relative; z-index: 1; }
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
+}
+
+/* Auto-scrolling marquee (default). Falls back to grid when few cards
+   or prefers-reduced-motion. */
+.case-marquee.is-marquee {
+  margin-top: 48px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+}
+
+.case-marquee.is-marquee .case-grid {
+  margin-top: 0;
+  display: flex;
+  gap: 20px;
+  width: max-content;
+  will-change: transform;
+}
+
+.case-marquee.is-marquee .case-card {
+  width: min(360px, 78vw);
+  flex: 0 0 auto;
 }
 
 .case-card {

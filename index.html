@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/surendar.css?v=20260716-r1">
+    <link rel="stylesheet" href="assets/css/surendar.css?v=20260717-r2">
   </head>
   <body class="sx-skin">
     <div class="sx-grain" aria-hidden="true"></div>
@@ -40,15 +40,11 @@
     </nav>
 
     <main id="main">
-      <!-- Full-bleed particle field behind left copy (Surendar structure) -->
-      <section class="sx-hero" id="home" data-image-slot="hero-portrait" data-hero-stage>
+      <!-- Hero: spiral stair concept object with chronological keywords -->
+      <section class="sx-hero" id="home" data-hero-stage>
         <div class="sx-hero-field" aria-hidden="true">
-          <canvas class="sx-hero-canvas" data-hero-canvas></canvas>
-          <div class="sx-hero-photo" data-hero-photo></div>
-          <div class="sx-hero-lens" data-hero-lens></div>
           <div class="sx-hero-fade"></div>
-          <img class="sx-hero-source" hidden alt="" data-image-preview>
-          <div class="sx-portrait-placeholder" data-image-fallback data-hero-fallback hidden></div>
+          <div class="sx-spiral" data-spiral></div>
         </div>
 
         <div class="sx-hero-inner">
@@ -57,9 +53,8 @@
               <span class="sx-eyebrow" data-site-location data-edit-text="location">济南 / 北京 · 可远程</span>
               <span class="sx-eyebrow sx-eyebrow-faint" data-site-focus data-edit-text="focus">产品体验 / 市场增长 / AI 工具</span>
             </div>
-            <h1 class="sx-name hero-in" style="--i:1" data-hero-name>
-              <span class="sx-name-line is-bright" data-name-first data-edit-text="nameFirst">王</span>
-              <span class="sx-name-line is-muted" data-name-last data-edit-text="nameLast">瑞泽</span>
+            <h1 class="sx-name is-single hero-in" style="--i:1" data-hero-name>
+              <span class="sx-name-line is-bright" data-name-first data-edit-text="nameFirst">王瑞泽</span>
             </h1>
             <p class="sx-lead hero-in" style="--i:2" data-site-intro data-edit-text="intro">
               新闻传播与金融复合背景，用产品思维与 vibe coding 把营销、投放、内容生产做成可复用的 SOP 与工具。
@@ -74,7 +69,6 @@
               Continue
             </a>
           </div>
-          <button type="button" class="sx-upload-btn sx-upload-hero" data-image-upload hidden>上传人像</button>
         </div>
       </section>
 
@@ -124,7 +118,9 @@
             从智能云市场 SOP、广告 Agent，到海外内容增长——每张卡片对应一段可核验的结果。
           </p>
         </div>
-        <div class="case-grid" data-case-grid></div>
+        <div class="case-marquee" data-case-marquee>
+          <div class="case-grid case-track" data-case-grid></div>
+        </div>
       </section>
 
       <section class="sx-section contact" id="contact">
@@ -165,9 +161,9 @@
     <input type="file" accept="image/*" hidden data-file-input>
 
     <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
-    <script src="assets/js/data.js?v=20260716-r1"></script>
-    <script src="assets/js/editor.js?v=20260716-r1"></script>
-    <script src="assets/js/hero-particles.js?v=20260716-r1"></script>
-    <script src="assets/js/surendar.js?v=20260716-r1"></script>
+    <script src="assets/js/data.js?v=20260717-r2"></script>
+    <script src="assets/js/editor.js?v=20260717-r2"></script>
+    <script src="assets/js/spiral-hero.js?v=20260717-r2"></script>
+    <script src="assets/js/surendar.js?v=20260717-r2"></script>
   </body>
 </html>
