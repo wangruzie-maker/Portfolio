@@ -7,8 +7,9 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
+  const isPublicSite = () => !!window.__WRZ_PUBLIC__;
   let content = normalizeContent(window.DEFAULT_CONTENT);
-  let editMode = new URLSearchParams(location.search).has("edit");
+  let editMode = !isPublicSite() && new URLSearchParams(location.search).has("edit");
   let saveTimer = null;
   let activeToolId = "wefly";
   let storageReady = false;
@@ -177,6 +178,7 @@
   }
 
   function setEditMode(on) {
+    if (isPublicSite()) on = false;
     editMode = on;
     const url = new URL(location.href);
     if (on) url.searchParams.set("edit", "1");
@@ -363,7 +365,7 @@
                 return `<a href="${href}" class="${active ? "active" : ""}">${label}</a>`;
               })
               .join("")}
-            <button type="button" class="nav-edit" id="edit-toggle">${editMode ? "退出编辑" : "编辑"}</button>
+            ${isPublicSite() ? "" : `<button type="button" class="nav-edit" id="edit-toggle">${editMode ? "退出编辑" : "编辑"}</button>`}
           </nav>
         </div>
       </header>`;
@@ -600,6 +602,7 @@
   }
 
   function renderEditBar() {
+    if (isPublicSite() || !editMode) return "";
     return `
       <aside class="edit-bar" aria-label="编辑工具条">
         <p>编辑模式 · 自动保存本机</p>

@@ -1082,3 +1082,9 @@ body.edit-on .add-module-wrap {
     transition: none !important;
   }
 }
+
+html.wrz-public .nav-edit,
+html.wrz-public .edit-bar {
+  display: none !important;
+}
+

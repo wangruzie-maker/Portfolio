@@ -174,3 +174,10 @@ body.is-editing .merge-tools-media .journey-upload {
     border-bottom: 1px solid var(--sx-line);
   }
 }
+
+/* Public deploy: never show local edit / sync chrome */
+html.wrz-public .edit-chrome,
+html.wrz-public [data-edit-root] {
+  display: none !important;
+}
+

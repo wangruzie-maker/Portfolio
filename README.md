@@ -1,25 +1,30 @@
-# 王瑞泽 Portfolio Demo
+# Wang Ruize · Portfolio
 
-极简黑金静态站：主页 + 4 经历 + 工具 + 作品。可静态托管。
+黑金静态站：主页 + Journey / Lab / Work 详情。可静态托管。
+
+## 线上地址
+
+推送到 `main` 后由 GitHub Pages 自动部署：
+
+**https://wangruzie-maker.github.io/Portfolio/**
+
+线上版本会隐藏「编辑 / 导出同步包」；仅本机 `localhost` 可编辑。
 
 ## 本地预览
 
 ```bash
-# 任意静态服务器即可，例如：
-npx --yes serve .
-# 或 Python
-python -m http.server 5173
+npx --yes serve -l 5173 .
 ```
 
-打开 `http://localhost:5173`（或提示的端口）。
+打开 `http://localhost:5173`。本地仍可编辑并导出全局同步包。
 
-## 编辑模式
+用 `?public=1` 可在本地预览「线上只读」效果。
 
-- 点右上角「编辑」，或访问 `/?edit=1#/home`
-- 点击文案即可改字，**自动保存到 localStorage**
-- 经历页可「新增 / 上移 / 下移 / 删除」产出模块
-- 「导出 JSON」便于提交到仓库覆盖默认文案
-- 「恢复默认」清除本机修改
+## 编辑模式（仅本地）
+
+- 点「编辑内容」，或访问 `/?edit=1`
+- 改字 / 换图自动保存在本机
+- 「导出全局同步包」后放到 `sync-inbox/`，用 `scripts/apply-browser-sync.py` 写入仓库
 
 ## 路由
 

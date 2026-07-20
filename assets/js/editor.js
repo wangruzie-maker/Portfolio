@@ -230,7 +230,12 @@
     edits.experienceIds = (track.itemIds || []).slice();
   }
 
+  function isPublicSite() {
+    return !!window.__WRZ_PUBLIC__;
+  }
+
   function wantEditMode() {
+    if (isPublicSite()) return false;
     const params = new URLSearchParams(window.location.search);
     if (params.get("edit") === "1") return true;
     if (params.get("edit") === "0") return false;
@@ -265,6 +270,7 @@
   }
 
   function mountChrome() {
+    if (isPublicSite()) return;
     if (document.querySelector("[data-edit-root]")) return;
 
     bindPlainPaste();
@@ -336,6 +342,7 @@
   }
 
   function setEditMode(on) {
+    if (isPublicSite()) on = false;
     sessionStorage.setItem("resume-edit-mode", on ? "1" : "0");
     document.body.classList.toggle("is-editing", on);
     const toggle = document.querySelector("[data-edit-toggle]");
