@@ -237,8 +237,9 @@
   function wantEditMode() {
     if (isPublicSite()) return false;
     const params = new URLSearchParams(window.location.search);
-    if (params.get("edit") === "1") return true;
     if (params.get("edit") === "0") return false;
+    // ?edit / ?edit=1 → enter editing immediately (incl. on Vercel/Pages unlock)
+    if (params.has("edit") && params.get("edit") !== "0") return true;
     return sessionStorage.getItem("resume-edit-mode") === "1";
   }
 

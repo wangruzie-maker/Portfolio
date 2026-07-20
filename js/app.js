@@ -9,7 +9,12 @@
 
   const isPublicSite = () => !!window.__WRZ_PUBLIC__;
   let content = normalizeContent(window.DEFAULT_CONTENT);
-  let editMode = !isPublicSite() && new URLSearchParams(location.search).has("edit");
+  let editMode = (() => {
+    if (isPublicSite()) return false;
+    const p = new URLSearchParams(location.search);
+    if (!p.has("edit")) return false;
+    return p.get("edit") !== "0" && p.get("edit") !== "false";
+  })();
   let saveTimer = null;
   let activeToolId = "wefly";
   let storageReady = false;
