@@ -50,7 +50,7 @@
         feishuUrl: "https://feishu.cn/docx/TODO_WORKS_COLLECTION"
       };
     }
-    // 回填默认演示链接（用户本地旧存档可能缺 demoUrl）
+    // 回填默认演示链接 / 配图（仅补缺，绝不覆盖用户已上传或已填写的内容）
     const defaults = window.DEFAULT_CONTENT && window.DEFAULT_CONTENT.tools;
     if (Array.isArray(defaults) && Array.isArray(c.tools)) {
       c.tools.forEach((tool) => {
@@ -58,11 +58,28 @@
         if (!base) return;
         if (!tool.demoUrl && base.demoUrl) {
           tool.demoUrl = base.demoUrl;
-          tool.demoLabel = tool.demoLabel || base.demoLabel;
-          tool.demoNote = tool.demoNote || base.demoNote;
         }
-        if ((!tool.images || !tool.images.some((img) => img.link)) && Array.isArray(base.images)) {
-          tool.images = deepClone(base.images);
+        if (!tool.demoLabel && base.demoLabel) {
+          tool.demoLabel = base.demoLabel;
+        }
+        if (!tool.demoNote && base.demoNote) {
+          tool.demoNote = base.demoNote;
+        }
+        if (!Array.isArray(tool.images) || !tool.images.length) {
+          if (Array.isArray(base.images) && base.images.length) {
+            tool.images = deepClone(base.images);
+          }
+          return;
+        }
+        // 按序号只补空字段，保留用户 src / label / link
+        if (Array.isArray(base.images)) {
+          tool.images.forEach((img, i) => {
+            const b = base.images[i];
+            if (!b || !img) return;
+            if (!img.src && b.src) img.src = b.src;
+            if (!img.label && b.label) img.label = b.label;
+            if (!img.link && b.link) img.link = b.link;
+          });
         }
       });
     }
@@ -246,6 +263,15 @@
     const hash = location.hash.replace(/^#\/?/, "") || "home";
     const [page, id] = hash.split("/");
     return { page, id };
+  }
+
+  function isLegacyHomeHash() {
+    const h = location.hash || "";
+    return !h || h === "#" || h === "#/" || h === "#/home" || h === "#home";
+  }
+
+  function goToMainSite() {
+    location.replace("index.html");
   }
 
   function navigate(to) {
@@ -621,11 +647,19 @@
 
   function render() {
     const { page, id } = route();
+    // 详情站不再提供独立首页（易与主站混淆且卡片无封面显得「空」）
+    if (page === "home" || !page) {
+      goToMainSite();
+      return;
+    }
     let main = "";
     if (page === "experience") main = renderExperience(id || "baidu");
     else if (page === "tools") main = renderTools(id);
     else if (page === "works") main = renderWorks();
-    else main = renderHome();
+    else {
+      goToMainSite();
+      return;
+    }
 
     $("#app").innerHTML = `
       <div class="site">
@@ -914,6 +948,14 @@
       owner.images[currentIndex()].link = linkInput.value.trim();
       scheduleSave();
     });
+    linkInput?.addEventListener("blur", () => {
+      owner.images[currentIndex()].link = linkInput.value.trim();
+      persist("已保存跳转链接");
+    });
+    labelInput?.addEventListener("blur", () => {
+      owner.images[currentIndex()].label = labelInput.value;
+      persist("已保存图示标题");
+    });
 
     const fileInput = car.querySelector("[data-img-file]");
     const dropzone = car.querySelector("[data-dropzone]");
@@ -1028,23 +1070,36 @@
     $$(".carousel").forEach(bindCarousel);
 
     $$("[data-tool-demo-url]").forEach((input) => {
-      input.addEventListener("change", () => {
+      const saveDemoUrl = () => {
         const tool = content.tools.find((t) => t.id === input.dataset.toolId);
-        if (tool) {
-          tool.demoUrl = input.value.trim();
-          persist("已保存演示链接");
-          render();
-        }
-      });
-    });
-    $$("[data-tool-demo-label]").forEach((input) => {
+        if (!tool) return;
+        tool.demoUrl = input.value.trim();
+        persist("已保存演示链接");
+      };
       input.addEventListener("input", () => {
         const tool = content.tools.find((t) => t.id === input.dataset.toolId);
-        if (tool) {
-          tool.demoLabel = input.value;
-          scheduleSave();
-        }
+        if (!tool) return;
+        tool.demoUrl = input.value.trim();
+        scheduleSave();
       });
+      input.addEventListener("change", saveDemoUrl);
+      input.addEventListener("blur", saveDemoUrl);
+    });
+    $$("[data-tool-demo-label]").forEach((input) => {
+      const saveDemoLabel = () => {
+        const tool = content.tools.find((t) => t.id === input.dataset.toolId);
+        if (!tool) return;
+        tool.demoLabel = input.value;
+        persist("已保存按钮文案");
+      };
+      input.addEventListener("input", () => {
+        const tool = content.tools.find((t) => t.id === input.dataset.toolId);
+        if (!tool) return;
+        tool.demoLabel = input.value;
+        scheduleSave();
+      });
+      input.addEventListener("change", saveDemoLabel);
+      input.addEventListener("blur", saveDemoLabel);
     });
 
     $("[data-feishu-url]")?.addEventListener("change", (e) => {
@@ -1178,14 +1233,19 @@
     }
     storageReady = true;
     window.__detailContent = content;
-    try {
-      await persist();
-    } catch (_) {}
-    if (!location.hash || location.hash === "#/home" || location.hash === "#/") {
-      location.hash = "#/experience/baidu";
-    } else {
-      render();
+    // 给经历卡片补封面（取该经历第一张模块图），避免旧首页/入口显得空白
+    (content.experiences || []).forEach((exp) => {
+      if (exp.cardImage) return;
+      const firstImg = (exp.modules || [])
+        .flatMap((m) => m.images || [])
+        .find((img) => img && img.src);
+      if (firstImg) exp.cardImage = firstImg.src;
+    });
+    if (isLegacyHomeHash()) {
+      goToMainSite();
+      return;
     }
+    render();
   }
 
   boot();
