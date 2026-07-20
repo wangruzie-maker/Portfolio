@@ -1,0 +1,11 @@
+# Large browser sync packs (base64) — do not commit
+sync-inbox/*.json
+sync-inbox/_*.txt
+*.bak
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+node_modules/

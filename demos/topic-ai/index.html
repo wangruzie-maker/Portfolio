@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>社媒内容工作台 · 演示</title>
+  <style>
+    :root {
+      --bg: #f4f8ff;
+      --panel: #fff;
+      --panel-2: #f3f7ff;
+      --border: #d9e6ff;
+      --text: #183052;
+      --muted: #6b84ab;
+      --accent: #2f7bff;
+      --accent-2: #67a2ff;
+      --ok: #22b07d;
+      --err: #eb5757;
+      --shadow: 0 14px 34px rgba(40, 96, 180, 0.12);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(1100px 520px at 0% -10%, rgba(47,123,255,.12), transparent 60%),
+        radial-gradient(900px 480px at 100% 0%, rgba(103,162,255,.12), transparent 58%),
+        var(--bg);
+    }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 18px 56px; }
+    header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent), #ff8a65);
+      display: grid; place-items: center; color: #fff; font-weight: 800; box-shadow: var(--shadow);
+    }
+    h1 { margin: 0; font-size: 1.35rem; }
+    .sub { margin: 4px 0 0; color: var(--muted); font-size: .88rem; }
+    .badge {
+      padding: 6px 12px; border-radius: 999px; font-size: .8rem;
+      border: 1px solid rgba(47,123,255,.35); color: var(--accent); background: rgba(47,123,255,.08);
+    }
+    .banner {
+      padding: 12px 14px; border-radius: 12px; margin-bottom: 14px;
+      background: #eaf2ff; border: 1px solid var(--border); font-size: .86rem; color: var(--muted); line-height: 1.55;
+    }
+    .banner strong { color: var(--text); }
+    .main-tabs, .plat-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .tab {
+      border: 1px solid var(--border); background: var(--panel); border-radius: 999px;
+      padding: 10px 18px; font-weight: 600; font-size: .9rem; cursor: pointer; color: var(--text);
+    }
+    .tab.on { background: #e8f0ff; border-color: rgba(47,123,255,.45); color: var(--accent); }
+    .plat-tab {
+      border: 1px solid var(--border); background: var(--panel); border-radius: 999px;
+      padding: 7px 14px; font-size: .84rem; cursor: pointer; color: var(--text);
+    }
+    .plat-tab.on { background: rgba(47,123,255,.14); border-color: rgba(47,123,255,.45); color: var(--accent); font-weight: 600; }
+    .grid-2 {
+      display: grid; grid-template-columns: 1fr 1.15fr; gap: 14px; align-items: stretch;
+    }
+    @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+    .panel {
+      background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 16px; min-height: 320px;
+    }
+    .panel-head { font-weight: 700; margin-bottom: 12px; font-size: .98rem; }
+    label.field { display: block; font-size: .8rem; color: var(--muted); margin: 10px 0 4px; }
+    input, select, textarea {
+      width: 100%; padding: 9px 11px; border-radius: 10px; border: 1px solid var(--border);
+      background: var(--panel-2); color: var(--text); font: inherit;
+    }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+    button {
+      border: none; border-radius: 10px; padding: 9px 14px; font-weight: 600; font-size: .86rem; cursor: pointer;
+    }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+    .btn-primary:disabled { opacity: .55; cursor: wait; }
+    .btn-secondary { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); }
+    .btn-danger { background: #fff; border: 1px solid #f3c2c2; color: var(--err); }
+    .btn-small { padding: 6px 10px; font-size: .78rem; }
+    .hint { color: var(--muted); font-size: .82rem; line-height: 1.5; margin-top: 10px; }
+    .stats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .stat {
+      padding: 6px 11px; border-radius: 999px; background: var(--panel-2);
+      border: 1px solid var(--border); font-size: .8rem; color: var(--muted);
+    }
+    .stat strong { color: var(--text); }
+    .empty {
+      min-height: 180px; display: grid; place-items: center; text-align: center;
+      color: var(--muted); font-size: .9rem; padding: 24px; line-height: 1.6;
+      border: 1px dashed var(--border); border-radius: 12px; background: var(--panel-2);
+    }
+    .progress { height: 8px; border-radius: 999px; background: #e8efff; overflow: hidden; margin: 10px 0 12px; }
+    .progress > i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .18s; }
+    .cards { display: grid; gap: 10px; max-height: 420px; overflow: auto; padding-right: 2px; }
+    .card {
+      border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: #fff;
+      display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .card.is-on { border-color: rgba(47,123,255,.55); box-shadow: 0 0 0 2px rgba(47,123,255,.12); }
+    .card input { width: auto; margin-top: 3px; }
+    .card h3 { margin: 0 0 4px; font-size: .92rem; line-height: 1.35; }
+    .meta { display: flex; gap: 10px; flex-wrap: wrap; color: var(--muted); font-size: .76rem; }
+    .chip {
+      display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .72rem;
+      background: rgba(47,123,255,.08); color: var(--accent); margin-right: 4px;
+    }
+    .script {
+      margin-top: 8px; padding: 9px 10px; border-radius: 10px; background: var(--panel-2);
+      border: 1px solid var(--border); white-space: pre-wrap; font-size: .82rem; line-height: 1.5;
+      max-height: 110px; overflow: auto; color: #2a4468;
+    }
+    .hidden { display: none !important; }
+    .topic-item { border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: #fff; margin-top: 8px; }
+    .topic-item .angle { color: var(--accent); font-size: .78rem; font-weight: 700; margin-bottom: 4px; }
+    .bars { display: grid; gap: 8px; margin-top: 8px; }
+    .bar-row { display: grid; grid-template-columns: 110px 1fr 40px; gap: 8px; align-items: center; font-size: .82rem; }
+    .bar-track { height: 8px; border-radius: 999px; background: #e8efff; overflow: hidden; }
+    .bar-track > i { display: block; height: 100%; background: var(--accent); }
+    .toast {
+      position: fixed; right: 18px; bottom: 18px; padding: 10px 14px; border-radius: 10px;
+      background: #183052; color: #fff; font-size: .86rem; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 20;
+    }
+    .toast.show { opacity: 1; }
+    .track-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+    .track-card {
+      padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--panel-2);
+    }
+    .track-card .lab { color: var(--muted); font-size: .78rem; }
+    .track-card .val { font-size: 1.45rem; font-weight: 700; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">情</div>
+        <div>
+          <h1>社媒内容工作台</h1>
+          <p class="sub">选题依据 → 选择性转录 → 创作选题 → 发布追踪</p>
+        </div>
+      </div>
+      <div class="badge">演示版 · 静态可交互</div>
+    </header>
+
+    <div class="banner">
+      基于 cuddly-guacamole 的<strong>前端演示</strong>：无需后端 / 登录。点左侧「运行采集」会用预置样例填充右侧结果，交互逻辑对齐正式版工作台。
+    </div>
+
+    <div class="main-tabs" id="mainTabs">
+      <button type="button" class="tab on" data-tab="collect">获取选题与依据</button>
+      <button type="button" class="tab" data-tab="analyze">转录与选题分析</button>
+      <button type="button" class="tab" data-tab="track">数据追踪</button>
+    </div>
+
+    <div class="plat-tabs" id="platTabs">
+      <button type="button" class="plat-tab on" data-plat="小红书">小红书</button>
+      <button type="button" class="plat-tab" data-plat="视频号">视频号</button>
+    </div>
+
+    <section id="tab-collect">
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head">关键词采集（演示）</div>
+          <label class="field">搜索关键词</label>
+          <input id="keyword" value="AI 工作流" />
+          <label class="field">采集深度</label>
+          <select id="depth">
+            <option value="50">50 条候选</option>
+            <option value="100" selected>100 条候选</option>
+            <option value="200">200 条候选</option>
+          </select>
+          <label class="field">最低互动（点赞）</label>
+          <input id="minLiked" type="number" min="0" value="500" />
+          <div class="row">
+            <button type="button" class="btn-primary" id="runCollect">运行采集（演示）</button>
+            <button type="button" class="btn-secondary" id="resetCollect">重置</button>
+          </div>
+          <p class="hint">演示模式会用预置样例填充结果，交互逻辑对齐正式版工作台。</p>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">采集结果预览</div>
+          <div class="stats">
+            <div class="stat">样本 <strong id="sampleCount">0</strong></div>
+            <div class="stat">已勾选 <strong id="selectedCount">0</strong></div>
+            <div class="stat">平台 <strong id="platLabel">小红书</strong></div>
+          </div>
+          <div class="progress hidden" id="runProgress"><i id="runBar"></i></div>
+          <div id="resultArea">
+            <div class="empty" id="emptyState">点击左侧「运行采集」后，这里会出现可勾选的依据样本。</div>
+            <div class="cards hidden" id="itemCards"></div>
+          </div>
+          <div class="row hidden" id="collectActions">
+            <button type="button" class="btn-secondary btn-small" id="selectAll">全选</button>
+            <button type="button" class="btn-secondary btn-small" id="clearSel">清空勾选</button>
+            <button type="button" class="btn-primary" id="toAnalyze">用已选样本去做转录与选题分析 →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-analyze" class="hidden">
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head">语料主题强度</div>
+          <p class="hint" id="analyzeHint">先在「获取选题与依据」勾选样本。</p>
+          <div class="bars" id="themeBars"></div>
+          <div class="row" style="margin-top:14px">
+            <button type="button" class="btn-primary" id="genTopics">生成选题方向</button>
+            <button type="button" class="btn-secondary" id="exportMd">导出选题包 Markdown</button>
+          </div>
+          <div id="topicOut"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">已选依据 · 口播 / OCR 预览</div>
+          <div class="cards" id="analyzeCards"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-track" class="hidden">
+      <div class="panel">
+        <div class="panel-head">发布追踪总览（演示数据）</div>
+        <div class="track-grid" id="trackCards"></div>
+        <p class="hint">正式版会回传各平台发布后的点赞 / 收藏 / 评论；此处用静态样例示意。</p>
+      </div>
+    </section>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const SAMPLES = {
+      "小红书": [
+        {
+          id: "x1",
+          title: "体验腾讯 WorkBuddy：1 分钟让 AI 入驻工作流",
+          author: "陈兴AI",
+          type: "视频",
+          liked: "1.1万",
+          collected: "1327",
+          comment: "40",
+          script: "腾讯版 OpenClaw 来了，今天我们就来上手体验最新的 WorkBuddy。\n尤其是微信远程操作电脑的功能。\n和传统 AI 对话不同，它不仅能听懂人话，还能真正操作电脑里的文件。"
+        },
+        {
+          id: "x2",
+          title: "Claude 4 发布：50% 成功率为何让整个行业睡不着",
+          author: "AI观察员",
+          type: "图文",
+          liked: "8520",
+          collected: "4200",
+          comment: "318",
+          script: "（OCR）Claude 4 · SWE-bench 50%\n先定验收标准 → 再拆任务 → 最后回写复盘。"
+        },
+        {
+          id: "x3",
+          title: "腾讯 WorkBuddy 深度拆解：三招养虾 + 独家提示词",
+          author: "噗噗Ning-AI",
+          type: "视频",
+          liked: "929",
+          collected: "1702",
+          comment: "1375",
+          script: "第一招：选对本地工作文件夹。\n第二招：任务描述要具体。\n第三招：微信接入后，手机就是远程遥控器。"
+        },
+        {
+          id: "x4",
+          title: "50%的成功率，为什么已经让整个行业睡不着了 #Claude",
+          author: "飞枢科创",
+          type: "视频",
+          liked: "1236",
+          collected: "69",
+          comment: "1394",
+          script: "从今年起，你可以拿着手机，指挥家里那台 Mac 替你干活了。\n50% 成功率对复杂软件工程任务来说，已经是行业跃迁。"
+        }
+      ],
+      "视频号": [
+        {
+          id: "c1",
+          title: "AI 工作流实操：地铁上指挥电脑写周报",
+          author: "增长笔记",
+          type: "视频",
+          liked: "6400",
+          collected: "980",
+          comment: "210",
+          script: "先打开工作区，再口述验收标准，最后让 Agent 自己跑完回传结果。"
+        },
+        {
+          id: "c2",
+          title: "竞品对比口播模板：能力边界怎么讲清楚",
+          author: "内容工厂",
+          type: "视频",
+          liked: "3100",
+          collected: "560",
+          comment: "88",
+          script: "开头抛场景 → 中间拆三步对比 → 结尾给选型结论。"
+        },
+        {
+          id: "c3",
+          title: "提示词公式：把「帮我写」改成可验收任务",
+          author: "效率实验室",
+          type: "视频",
+          liked: "2100",
+          collected: "740",
+          comment: "65",
+          script: "目标 + 约束 + 交付物格式，三件套写进提示词。"
+        }
+      ]
+    };
+
+    const THEMES = [
+      { name: "AI 工作流", pct: 92 },
+      { name: "远程操控电脑", pct: 78 },
+      { name: "口播测评结构", pct: 71 },
+      { name: "提示词公式", pct: 64 },
+      { name: "效率工具入驻", pct: 58 }
+    ];
+
+    const TOPICS = [
+      { angle: "场景切入", title: "地铁上指挥电脑干活：AI 工作流的真实一天", why: "命中远程操控高频诉求，适合短视频开场钩子。" },
+      { angle: "对比测评", title: "WorkBuddy vs Codex：差在「能把事做完」", why: "共现词集中在执行闭环，适合做能力边界说明。" },
+      { angle: "方法论", title: "三招养虾公式：文件夹 / 验收标准 / 微信遥控", why: "样本已沉淀步骤化口播，可直接改写成 SOP。" }
+    ];
+
+    let platform = "小红书";
+    let items = [];
+    let selected = new Set();
+    let running = false;
+
+    const $ = (s) => document.querySelector(s);
+    const $$ = (s) => [...document.querySelectorAll(s)];
+
+    function toast(msg) {
+      const el = $("#toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(el._t);
+      el._t = setTimeout(() => el.classList.remove("show"), 1800);
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function switchTab(tab) {
+      $$("#mainTabs .tab").forEach((b) => b.classList.toggle("on", b.dataset.tab === tab));
+      $("#tab-collect").classList.toggle("hidden", tab !== "collect");
+      $("#tab-analyze").classList.toggle("hidden", tab !== "analyze");
+      $("#tab-track").classList.toggle("hidden", tab !== "track");
+      if (tab === "analyze") renderAnalyze();
+      if (tab === "track") renderTrack();
+    }
+
+    function updateCounts() {
+      $("#sampleCount").textContent = String(items.length);
+      $("#selectedCount").textContent = String(selected.size);
+      $("#platLabel").textContent = platform;
+    }
+
+    function renderCards() {
+      const box = $("#itemCards");
+      const empty = $("#emptyState");
+      if (!items.length) {
+        empty.classList.remove("hidden");
+        box.classList.add("hidden");
+        $("#collectActions").classList.add("hidden");
+        updateCounts();
+        return;
+      }
+      empty.classList.add("hidden");
+      box.classList.remove("hidden");
+      $("#collectActions").classList.remove("hidden");
+      box.innerHTML = items.map((it) => `
+        <label class="card ${selected.has(it.id) ? "is-on" : ""}" data-id="${it.id}">
+          <input type="checkbox" ${selected.has(it.id) ? "checked" : ""} />
+          <div>
+            <h3>${escapeHtml(it.title)}</h3>
+            <div class="meta">
+              <span class="chip">${escapeHtml(it.type)}</span>
+              <span>@${escapeHtml(it.author)}</span>
+              <span>赞 ${escapeHtml(it.liked)}</span>
+              <span>藏 ${escapeHtml(it.collected)}</span>
+              <span>评 ${escapeHtml(it.comment)}</span>
+            </div>
+            <div class="script">${escapeHtml(it.script)}</div>
+          </div>
+        </label>
+      `).join("");
+      box.querySelectorAll(".card").forEach((card) => {
+        const id = card.dataset.id;
+        const cb = card.querySelector("input");
+        const sync = () => {
+          if (cb.checked) selected.add(id);
+          else selected.delete(id);
+          card.classList.toggle("is-on", cb.checked);
+          updateCounts();
+        };
+        cb.addEventListener("change", sync);
+        card.addEventListener("click", (e) => {
+          if (e.target === cb) return;
+          cb.checked = !cb.checked;
+          sync();
+        });
+      });
+      updateCounts();
+    }
+
+    function runCollect() {
+      if (running) return;
+      running = true;
+      const btn = $("#runCollect");
+      btn.disabled = true;
+      btn.textContent = "采集中…";
+      $("#runProgress").classList.remove("hidden");
+      const bar = $("#runBar");
+      bar.style.width = "0%";
+      selected.clear();
+      items = [];
+      renderCards();
+
+      const keyword = ($("#keyword").value || "AI 工作流").trim();
+      const depth = Number($("#depth").value) || 100;
+      const pool = SAMPLES[platform] || SAMPLES["小红书"];
+      let step = 0;
+      const timer = setInterval(() => {
+        step += 1;
+        bar.style.width = `${Math.min(100, step * 12)}%`;
+        if (step >= 8) {
+          clearInterval(timer);
+          items = pool.map((it, i) => ({
+            ...it,
+            title: i === 0 ? `${it.title} · 命中「${keyword}」` : it.title
+          }));
+          // 演示：按深度只展示前 N 条（样例池有限）
+          items = items.slice(0, Math.min(items.length, Math.ceil(depth / 50) + 1));
+          selected.add(items[0].id);
+          if (items[1]) selected.add(items[1].id);
+          renderCards();
+          bar.style.width = "100%";
+          btn.disabled = false;
+          btn.textContent = "运行采集（演示）";
+          running = false;
+          toast(`已采集 ${items.length} 条「${platform}」样本（演示）`);
+          setTimeout(() => $("#runProgress").classList.add("hidden"), 500);
+        }
+      }, 120);
+    }
+
+    function resetCollect() {
+      items = [];
+      selected.clear();
+      $("#keyword").value = "AI 工作流";
+      $("#depth").value = "100";
+      $("#minLiked").value = "500";
+      $("#runProgress").classList.add("hidden");
+      renderCards();
+      toast("已重置");
+    }
+
+    function renderAnalyze() {
+      const hint = $("#analyzeHint");
+      const cards = $("#analyzeCards");
+      const picked = items.filter((it) => selected.has(it.id));
+      if (!picked.length) {
+        hint.textContent = "还没有勾选样本。请回到「获取选题与依据」运行采集并勾选。";
+        cards.innerHTML = `<div class="empty">暂无已选依据</div>`;
+        $("#themeBars").innerHTML = "";
+        $("#topicOut").innerHTML = "";
+        return;
+      }
+      hint.textContent = `已载入 ${picked.length} 条依据 · 平台 ${platform} · 关键词「${$("#keyword").value}」`;
+      $("#themeBars").innerHTML = THEMES.map((t) => `
+        <div class="bar-row">
+          <span>${escapeHtml(t.name)}</span>
+          <div class="bar-track"><i style="width:${t.pct}%"></i></div>
+          <span>${t.pct}</span>
+        </div>
+      `).join("");
+      cards.innerHTML = picked.map((it) => `
+        <div class="card">
+          <div></div>
+          <div>
+            <h3>${escapeHtml(it.title)}</h3>
+            <div class="meta"><span>@${escapeHtml(it.author)}</span><span>${escapeHtml(it.type)}</span></div>
+            <div class="script">${escapeHtml(it.script)}</div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function genTopics() {
+      if (!selected.size) {
+        toast("请先勾选至少 1 条样本");
+        switchTab("collect");
+        return;
+      }
+      $("#topicOut").innerHTML = TOPICS.map((t) => `
+        <div class="topic-item">
+          <div class="angle">${escapeHtml(t.angle)}</div>
+          <strong>${escapeHtml(t.title)}</strong>
+          <p class="hint" style="margin:6px 0 0">${escapeHtml(t.why)}</p>
+        </div>
+      `).join("");
+      toast("已生成 3 个选题方向");
+    }
+
+    function exportMd() {
+      if (!selected.size) {
+        toast("请先勾选样本");
+        return;
+      }
+      const picked = items.filter((it) => selected.has(it.id));
+      const md = [
+        `# 选题包 · ${$("#keyword").value}`,
+        ``,
+        `平台：${platform}`,
+        ``,
+        `## 依据样本`,
+        ...picked.map((it, i) => `${i + 1}. ${it.title}（@${it.author}）`),
+        ``,
+        `## 选题方向`,
+        ...TOPICS.map((t) => `- [${t.angle}] ${t.title}`)
+      ].join("\n");
+      const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "选题包-演示.md";
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast("已导出 Markdown");
+    }
+
+    function renderTrack() {
+      const n = Math.max(selected.size, items.length ? 2 : 0);
+      const data = [
+        { lab: "累计内容", val: String(12 + n) },
+        { lab: "成功数", val: String(10 + n) },
+        { lab: "成功率", val: n ? "91.2%" : "0%" },
+        { lab: "处理中", val: "1" },
+        { lab: "异常/失败", val: "0" }
+      ];
+      $("#trackCards").innerHTML = data.map((d) => `
+        <div class="track-card">
+          <div class="lab">${d.lab}</div>
+          <div class="val">${d.val}</div>
+        </div>
+      `).join("");
+    }
+
+    $$("#mainTabs .tab").forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.tab)));
+    $$("#platTabs .plat-tab").forEach((b) => b.addEventListener("click", () => {
+      platform = b.dataset.plat;
+      $$("#platTabs .plat-tab").forEach((x) => x.classList.toggle("on", x === b));
+      items = [];
+      selected.clear();
+      renderCards();
+      toast(`已切换到 ${platform}`);
+    }));
+
+    $("#runCollect").onclick = runCollect;
+    $("#resetCollect").onclick = resetCollect;
+    $("#selectAll").onclick = () => {
+      items.forEach((it) => selected.add(it.id));
+      renderCards();
+    };
+    $("#clearSel").onclick = () => {
+      selected.clear();
+      renderCards();
+    };
+    $("#toAnalyze").onclick = () => {
+      if (!selected.size) {
+        toast("请先勾选至少 1 条");
+        return;
+      }
+      switchTab("analyze");
+    };
+    $("#genTopics").onclick = genTopics;
+    $("#exportMd").onclick = exportMd;
+
+    renderCards();
+  </script>
+</body>
+</html>
