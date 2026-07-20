@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/surendar.css?v=20260717-r2">
+    <link rel="stylesheet" href="assets/css/surendar.css?v=20260720-r7">
   </head>
   <body class="sx-skin">
     <div class="sx-grain" aria-hidden="true"></div>
@@ -19,29 +19,15 @@
     <a class="sx-skip" href="#main">Skip to content</a>
 
     <header class="sx-header">
-      <a class="sx-brand" href="#home">
-        <span data-site-name data-edit-text="name">王瑞泽</span><span class="sx-brand-dot">.</span>
-      </a>
-      <nav class="sx-nav" aria-label="Primary">
+      <nav class="sx-nav" aria-label="Primary" data-primary-nav>
         <a href="#home">Home</a>
-        <a href="#about">About</a>
-        <a href="#journey">Journey</a>
-        <a href="#work">Work</a>
-        <a href="#contact">Contact</a>
+        <a href="#journey" data-nav-module="journey">Journey</a>
+        <a href="#work" data-nav-module="work">Work</a>
       </nav>
-      <div class="sx-socials" data-socials></div>
     </header>
 
-    <nav class="sx-rail" aria-label="Jump to section">
-      <a href="#about" data-rail="about">About</a>
-      <a href="#journey" data-rail="journey">Journey</a>
-      <a href="#work" data-rail="work">Work</a>
-      <a href="#contact" data-rail="contact">Contact</a>
-    </nav>
-
     <main id="main">
-      <!-- Hero: spiral stair concept object with chronological keywords -->
-      <section class="sx-hero" id="home" data-hero-stage>
+      <section class="sx-hero" id="home" data-hero-stage data-module="home">
         <div class="sx-hero-field" aria-hidden="true">
           <div class="sx-hero-fade"></div>
           <div class="sx-spiral" data-spiral></div>
@@ -59,96 +45,68 @@
             <p class="sx-lead hero-in" style="--i:2" data-site-intro data-edit-text="intro">
               新闻传播与金融复合背景，用产品思维与 vibe coding 把营销、投放、内容生产做成可复用的 SOP 与工具。
             </p>
-            <div class="sx-cta-row hero-in" style="--i:3">
-              <a class="sx-btn primary" href="#journey">View journey</a>
-              <a class="sx-btn gold" href="#contact">Get in touch</a>
-              <a class="sx-btn ghost" href="#work">Work ↗</a>
+            <div class="sx-hero-contact hero-in" style="--i:3">
+              <a class="sx-contact-chip" data-mail-card href="mailto:wangruzie@gmail.com">
+                <span>Email</span>
+                <strong data-site-email data-edit-text="email">wangruzie@gmail.com</strong>
+              </a>
+              <a class="sx-contact-chip" data-phone-card href="tel:15315189380">
+                <span>Phone</span>
+                <strong data-site-phone data-edit-text="phone">15315189380</strong>
+              </a>
             </div>
-            <a class="sx-scroll-hint hero-in" style="--i:4" href="#about">
-              <span class="sx-scroll-line" aria-hidden="true"></span>
-              Continue
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <section class="sx-section" id="about">
-        <div class="sx-about-grid">
-          <div class="reveal">
-            <p class="sx-bracket">[ About ]</p>
-            <h2 class="sx-h2" data-edit-text="aboutTitle">把经历说清楚</h2>
-            <p class="sx-copy" data-site-summary data-edit-text="summary">
-              新闻传播与金融复合学科背景，兼备文理思维、产品与市场化思维，以及中英日语言优势。熟悉并乐于把 AI 技术用于工作提效与调优，具备从设计到研发的跨部门协作能力，以及产品、运营增长、市场等实战经验与抗压能力。
-            </p>
-          </div>
-          <div class="sx-about-side reveal delay-1">
-            <div class="sx-panel soft">
-              <p class="sx-bracket">[ Status ]</p>
-              <p data-site-status data-edit-text="status">电话 15315189380 · 开放全职机会</p>
-            </div>
-            <div class="sx-panel soft">
-              <p class="sx-bracket">[ Skills ]</p>
+            <div class="sx-hero-skills hero-in" style="--i:4">
               <div class="sx-tags" data-resume-tags></div>
             </div>
-            <div class="sx-panel soft">
-              <p class="sx-bracket">[ Mission ]</p>
-              <p data-edit-text="mission">把业务痛点拆成可验证的 SOP 与工具，用更低成本交付更高质量的内容与增长结果。</p>
+            <div class="sx-cta-row hero-in" style="--i:5">
+              <a class="sx-btn primary" href="#journey">View journey</a>
+              <a class="sx-btn gold" href="mailto:wangruzie@gmail.com" data-mail-cta>Get in touch</a>
+              <a class="sx-btn ghost" href="#work">Work ↗</a>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="sx-section" id="journey">
+      <section class="sx-section" id="journey" data-module="journey">
         <div class="sx-section-head reveal">
           <p class="sx-bracket">[ My journey ]</p>
-          <h2 class="sx-h2">Where I have worked</h2>
-          <p class="sx-section-lead">教育与工作经历主线：山大 / 重大 · 百度 · 趣丸 · 讯飞 · 紫讯 · 字节。</p>
+          <h2 class="sx-h2">教育背景与实习经历</h2>
+          <p class="sx-section-lead">教育与实习分块展示：山大 / 重大 · 百度 · 趣丸 · 讯飞 · 紫讯。</p>
         </div>
-        <ol class="sx-journey" data-journey></ol>
+
+        <div class="journey-block reveal" data-journey-block="education">
+          <div class="journey-block-head">
+            <p class="sx-bracket">[ Education ]</p>
+            <h3 class="journey-block-title">教育背景</h3>
+          </div>
+          <ol class="sx-journey" data-journey="education"></ol>
+        </div>
+
+        <div class="journey-block reveal delay-1" data-journey-block="experience">
+          <div class="journey-block-head">
+            <p class="sx-bracket">[ Internships ]</p>
+            <h3 class="journey-block-title">实习经历</h3>
+          </div>
+          <ol class="sx-journey" data-journey="experience"></ol>
+        </div>
       </section>
 
-      <section class="sx-section" id="work">
+      <section class="sx-section" id="work" data-module="work">
         <div class="sx-section-head reveal">
           <p class="sx-bracket">[ Selected case studies ]</p>
           <div class="sx-section-head-row">
             <h2 class="sx-h2" data-edit-text="workTitle">精选作品与可验证项目。</h2>
-            <a class="sx-text-link" href="#contact">Get in touch →</a>
+            <a class="sx-text-link" href="mailto:wangruzie@gmail.com" data-mail-cta>Get in touch →</a>
           </div>
           <p class="sx-section-lead" data-edit-text="workLead">
-            从智能云市场 SOP、广告 Agent，到海外内容增长——每张卡片对应一段可核验的结果。
+            爆款内容、Agent 工具与四段实习入口——每张卡片对应一段可核验的结果。
           </p>
         </div>
         <div class="case-marquee" data-case-marquee>
           <div class="case-grid case-track" data-case-grid></div>
         </div>
-      </section>
-
-      <section class="sx-section contact" id="contact">
-        <div class="sx-section-head reveal">
-          <p class="sx-bracket">[ Contact ]</p>
-          <h2 class="sx-h2" data-site-contact-lead data-edit-text="contactLead">有合适机会，欢迎直接写信。</h2>
-        </div>
-        <div class="sx-contact-grid reveal delay-1">
-          <a class="sx-contact-card" href="mailto:wangruzie@gmail.com" data-mail-card>
-            <span>Email</span>
-            <strong data-site-email data-edit-text="email">wangruzie@gmail.com</strong>
-            <em>Write to me</em>
-          </a>
-          <div class="sx-contact-card is-static">
-            <span>Elsewhere</span>
-            <div class="sx-contact-links" data-socials-footer></div>
-            <em>Find me online</em>
-          </div>
-          <a class="sx-contact-card" href="#work">
-            <span>Work</span>
-            <strong>Selected cases</strong>
-            <em>Browse projects</em>
-          </a>
-          <a class="sx-contact-card" href="#journey">
-            <span>Résumé</span>
-            <strong>Career path</strong>
-            <em>View journey</em>
-          </a>
+        <div class="case-edit-bar" data-case-edit-bar hidden>
+          <button type="button" class="edit-fab" data-add-case>+ 新增项目卡片</button>
         </div>
       </section>
     </main>
@@ -161,9 +119,9 @@
     <input type="file" accept="image/*" hidden data-file-input>
 
     <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
-    <script src="assets/js/data.js?v=20260717-r2"></script>
-    <script src="assets/js/editor.js?v=20260717-r2"></script>
-    <script src="assets/js/spiral-hero.js?v=20260717-r2"></script>
-    <script src="assets/js/surendar.js?v=20260717-r2"></script>
+    <script src="assets/js/data.js?v=20260720-r8"></script>
+    <script src="assets/js/editor.js?v=20260720-r8"></script>
+    <script src="assets/js/spiral-hero.js?v=20260720-r8"></script>
+    <script src="assets/js/surendar.js?v=20260720-r8"></script>
   </body>
 </html>

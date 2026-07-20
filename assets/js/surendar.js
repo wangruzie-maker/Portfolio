@@ -38,16 +38,16 @@
   }
 
   function featuredWorks() {
-    const works = getWorks();
+    const works = getWorks().filter((w) => !w.hidden);
     const featured = works.filter((w) => w.featured);
-    const pool = featured.length >= 3 ? featured : works.filter((w) => w.categoryCn === "作品" || w.format === "Project");
+    const pool = featured.length ? featured : works.filter((w) => w.categoryCn === "作品" || w.categoryCn === "实习入口" || w.format === "Project");
     const list = pool.length ? pool : works;
     const seen = new Set();
     return list.filter((w) => {
       if (seen.has(w.id)) return false;
       seen.add(w.id);
       return true;
-    }).slice(0, 8);
+    }).slice(0, 12);
   }
 
   function setText(sel, value) {
@@ -61,16 +61,31 @@
     return `
       <div class="work-link-field" data-link-field>
         <label>跳转链接（留空不可点）</label>
-        <input type="url" data-edit-link="${escapeHTML(work.id)}" value="${escapeHTML(href)}" placeholder="https://… 或 mailto:…">
+        <input type="url" data-edit-link="${escapeHTML(work.id)}" value="${escapeHTML(href)}" placeholder="https://… 或 mailto:… 或子页面路径">
       </div>`;
+  }
+
+  function applyModules() {
+    const site = getSite();
+    const hidden = new Set(Array.isArray(site.hiddenModules) ? site.hiddenModules : []);
+    $$("[data-module]").forEach((section) => {
+      const id = section.getAttribute("data-module");
+      if (!id || id === "home") return;
+      section.hidden = hidden.has(id);
+      section.classList.toggle("is-module-hidden", hidden.has(id));
+    });
+    $$("[data-nav-module]").forEach((link) => {
+      const id = link.getAttribute("data-nav-module");
+      link.hidden = hidden.has(id);
+    });
   }
 
   function hydrateSite() {
     const site = getSite();
     const fullName = site.name || site.nameZh || `${site.nameFirst || ""}${site.nameLast || ""}`;
     setText("[data-site-name]", fullName);
-    setText("[data-name-first]", site.nameFirst || fullName.slice(0, Math.ceil(fullName.length / 2)));
-    setText("[data-name-last]", site.nameLast || fullName.slice(Math.ceil(fullName.length / 2)));
+    setText("[data-name-first]", site.nameFirst || fullName);
+    setText("[data-name-last]", site.nameLast || "");
     setText("[data-site-role]", site.role || "");
     setText("[data-site-intro]", site.intro || "");
     setText("[data-site-summary]", site.summary || "");
@@ -79,13 +94,17 @@
     setText("[data-site-focus]", site.focus || "");
     setText("[data-site-contact-lead]", site.contactLead || "");
     setText("[data-site-email]", site.email || "");
+    setText("[data-site-phone]", site.phone || "");
 
     ["mission"].forEach((key) => {
       if (site[key]) setText(`[data-edit-text="${key}"]`, site[key]);
     });
 
-    const mailCard = $("[data-mail-card]");
-    if (mailCard && site.email) mailCard.setAttribute("href", `mailto:${site.email}`);
+    $$("[data-mail-card], [data-mail-cta]").forEach((node) => {
+      if (site.email) node.setAttribute("href", `mailto:${site.email}`);
+    });
+    const phoneCard = $("[data-phone-card]");
+    if (phoneCard && site.phone) phoneCard.setAttribute("href", `tel:${String(site.phone).replace(/\s+/g, "")}`);
 
     if (site.workTitle) setText('[data-edit-text="workTitle"]', site.workTitle);
     if (site.workLead) setText('[data-edit-text="workLead"]', site.workLead);
@@ -108,6 +127,7 @@
       node.innerHTML = socialHtml;
     });
 
+    applyModules();
     applyImages();
   }
 
@@ -115,10 +135,15 @@
     const site = getSite();
     const images = (window.__resumeEdits && window.__resumeEdits.images) || {};
     const slots = site.slots || {};
+    const worksById = Object.fromEntries(getWorks().map((work) => [work.id, work]));
 
     $$("[data-image-slot]").forEach((root) => {
       const id = root.getAttribute("data-image-slot");
-      const src = images[id] || (slots[id] && slots[id].coverUrl) || "";
+      let src = images[id] || (slots[id] && slots[id].coverUrl) || "";
+      if (!src && id && id.startsWith("work:")) {
+        const work = worksById[id.slice(5)];
+        src = (work && (work.journeyCoverUrl || "")) || "";
+      }
       const img = root.querySelector("[data-image-preview]");
       const fallback = root.querySelector("[data-image-fallback]");
       if (!img) return;
@@ -146,24 +171,22 @@
     grid.innerHTML = featuredWorks()
       .map((work, index) => {
         const href = mediaHref(work);
-        const tags = (work.tags || []).slice(0, 3).map((tag) => `<span>${escapeHTML(tag)}</span>`).join("");
         const cover = images[`work:${work.id}`] || work.coverUrl || "";
         const media = cover
           ? `<div class="case-media"><img src="${escapeHTML(cover)}" alt="" loading="lazy"></div>`
           : `<div class="case-media"><div class="case-media-ph" aria-hidden="true"></div></div>`;
         const upload = `<button type="button" class="case-upload" data-image-upload data-work-image="${escapeHTML(work.id)}" hidden>上传封面</button>`;
-        const org = escapeHTML(work.categoryCn || work.format || "");
-        const year = escapeHTML(work.timelineSubTag || work.year || "");
+        const remove = `<button type="button" class="case-remove" data-remove-case="${escapeHTML(work.id)}" hidden aria-label="删除卡片">×</button>`;
+        const role = escapeHTML(work.categoryCn || work.format || "");
         const body = `
           ${media}
           <span class="case-badge">${href ? "Linked" : "Case"}</span>
           <div class="case-index">${String(index + 1).padStart(2, "0")}</div>
           ${upload}
+          ${remove}
           <div class="case-body">
             <h3 data-edit-work="${escapeHTML(work.id)}" data-edit-field="titleCn">${escapeHTML(work.titleCn || work.title)}</h3>
-            <p class="case-meta">${org}${year ? ` · ${year}` : ""}</p>
-            <p data-edit-work="${escapeHTML(work.id)}" data-edit-field="summaryCn">${escapeHTML(work.summaryCn || "")}</p>
-            <div class="case-tags">${tags}</div>
+            <p class="case-meta">${role}</p>
             ${linkField(work)}
           </div>`;
         const linkClass = href ? " has-link" : "";
@@ -209,7 +232,7 @@
         node.removeAttribute("contenteditable");
       });
       clone.querySelectorAll("[data-edit-link]").forEach((node) => node.removeAttribute("data-edit-link"));
-      clone.querySelectorAll("[data-image-upload]").forEach((node) => node.remove());
+      clone.querySelectorAll("[data-image-upload], [data-remove-case]").forEach((node) => node.remove());
       track.appendChild(clone);
     });
 
@@ -241,37 +264,47 @@
   }
 
   function renderJourney() {
-    const root = $("[data-journey]");
-    if (!root) return;
     const works = getWorks();
     const byId = Object.fromEntries(works.map((work) => [work.id, work]));
-    const items = [];
-    tracks.forEach((track) => {
-      (track.itemIds || []).forEach((id) => {
-        const work = byId[id];
-        if (work) items.push({ ...work, trackTitle: track.title, trackEye: track.eyebrow });
-      });
-    });
 
-    root.innerHTML = items
-      .map((work) => {
-        const href = mediaHref(work);
-        const linkClass = href ? " has-link" : "";
-        const inner = `
-          <div class="year">${escapeHTML(work.timelineSubTag || work.year || "")}<br>${escapeHTML(work.trackEye || work.trackTitle || "")}</div>
-          <div>
-            <p class="role">${escapeHTML(work.categoryCn || work.format || "")}</p>
-            <h3 data-edit-work="${escapeHTML(work.id)}" data-edit-field="titleCn">${escapeHTML(work.titleCn || work.title)}</h3>
-            <p data-edit-work="${escapeHTML(work.id)}" data-edit-field="summaryCn">${escapeHTML(work.summaryCn || "")}</p>
-            ${linkField(work)}
-          </div>`;
-        if (href) {
-          const external = /^https?:\/\//i.test(href) ? ' target="_blank" rel="noopener noreferrer"' : "";
-          return `<li><a class="journey-item reveal${linkClass}" data-work-id="${escapeHTML(work.id)}" href="${escapeHTML(href)}"${external}>${inner}</a></li>`;
-        }
-        return `<li><article class="journey-item is-static reveal${linkClass}" data-work-id="${escapeHTML(work.id)}">${inner}</article></li>`;
-      })
-      .join("");
+    tracks.forEach((track) => {
+      const root = $(`[data-journey="${track.id}"]`) || (tracks.length === 1 ? $("[data-journey]") : null);
+      if (!root) return;
+      const items = (track.itemIds || [])
+        .map((id) => byId[id])
+        .filter(Boolean)
+        .map((work) => ({ ...work, trackTitle: track.title, trackEye: track.eyebrow }));
+
+      root.innerHTML = items
+        .map((work) => {
+          const href = mediaHref(work);
+          const linkClass = href ? " has-link" : "";
+          const slotId = `work:${work.id}`;
+          const images = (window.__resumeEdits && window.__resumeEdits.images) || {};
+          const cover = images[slotId] || work.journeyCoverUrl || "";
+          const media = `
+            <div class="journey-media" data-image-slot="${escapeHTML(slotId)}">
+              <img class="journey-media-img" alt="" data-image-preview ${cover ? `src="${escapeHTML(cover)}"` : "hidden"}>
+              <div class="journey-media-ph" data-image-fallback ${cover ? "hidden" : ""} aria-hidden="true"></div>
+              <button type="button" class="case-upload journey-upload" data-image-upload data-work-image="${escapeHTML(work.id)}" hidden>上传图片</button>
+            </div>`;
+          const inner = `
+            <div class="year">${escapeHTML(work.timelineSubTag || work.year || "")}<br>${escapeHTML(work.trackEye || work.trackTitle || "")}</div>
+            ${media}
+            <div class="journey-copy">
+              <p class="role">${escapeHTML(work.categoryCn || work.format || "")}</p>
+              <h3 data-edit-work="${escapeHTML(work.id)}" data-edit-field="titleCn">${escapeHTML(work.titleCn || work.title)}</h3>
+              <p data-edit-work="${escapeHTML(work.id)}" data-edit-field="summaryCn">${escapeHTML(work.summaryCn || "")}</p>
+              ${linkField(work)}
+            </div>`;
+          if (href) {
+            const external = /^https?:\/\//i.test(href) ? ' target="_blank" rel="noopener noreferrer"' : "";
+            return `<li><a class="journey-item reveal${linkClass}" data-work-id="${escapeHTML(work.id)}" href="${escapeHTML(href)}"${external}>${inner}</a></li>`;
+          }
+          return `<li><article class="journey-item is-static reveal${linkClass}" data-work-id="${escapeHTML(work.id)}">${inner}</article></li>`;
+        })
+        .join("");
+    });
   }
 
   function setupReveal() {
@@ -374,10 +407,13 @@
     requestAnimationFrame(tick);
   }
 
-  function setupRail() {
-    const links = $$("[data-rail]");
+  function setupSectionNav() {
+    const links = $$("[data-primary-nav] a[href^='#']");
     const sections = links
-      .map((link) => document.getElementById(link.getAttribute("data-rail")))
+      .map((link) => {
+        const id = (link.getAttribute("href") || "").slice(1);
+        return id ? document.getElementById(id) : null;
+      })
       .filter(Boolean);
     if (!links.length || !sections.length || !("IntersectionObserver" in window)) return;
 
@@ -387,7 +423,8 @@
           if (!entry.isIntersecting) return;
           const id = entry.target.id;
           links.forEach((link) => {
-            link.classList.toggle("is-active", link.getAttribute("data-rail") === id);
+            const href = link.getAttribute("href") || "";
+            link.classList.toggle("is-active", href === `#${id}`);
           });
         });
       },
@@ -462,7 +499,7 @@
 
   function init() {
     paint();
-    setupRail();
+    setupSectionNav();
     setupLenis();
     setupParallaxMist();
     setupDust();
