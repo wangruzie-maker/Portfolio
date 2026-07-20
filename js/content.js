@@ -61,13 +61,8 @@ window.DEFAULT_CONTENT = {
               "link": ""
             },
             {
-              "label": "图示 4",
+              "label": "星阵 · 更多界面",
               "src": "assets/covers/detail/baidu-b1-3.jpg",
-              "link": ""
-            },
-            {
-              "label": "图示 5",
-              "src": "",
               "link": ""
             }
           ]
@@ -455,18 +450,28 @@ window.DEFAULT_CONTENT = {
         "日产 100+",
         "成本下降 70%+"
       ],
-      "demoNote": "可后续导出静态页或放录屏；在编辑里为配图填写演示链接。",
+      "demoNote": "内网部署，线上无法直接打开；面试可投屏演示。右侧为平台界面截图，与百度经历中的星阵模块同源。",
       "demoUrl": "",
-      "demoLabel": "演示链接待补充",
+      "demoLabel": "内网演示（投屏）",
       "images": [
         {
-          "label": "星阵平台截图",
-          "src": "",
+          "label": "星阵 · 工作台",
+          "src": "assets/covers/detail/baidu-b1-0.png",
           "link": ""
         },
         {
-          "label": "批量生产界面",
-          "src": "",
+          "label": "星阵 · 批量生产",
+          "src": "assets/covers/detail/baidu-b1-1.png",
+          "link": ""
+        },
+        {
+          "label": "星阵 · 数据闭环",
+          "src": "assets/covers/detail/baidu-b1-2.png",
+          "link": ""
+        },
+        {
+          "label": "星阵 · 更多界面",
+          "src": "assets/covers/detail/baidu-b1-3.jpg",
           "link": ""
         }
       ]
