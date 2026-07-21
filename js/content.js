@@ -488,7 +488,7 @@ window.DEFAULT_CONTENT = {
         "内容生产效率提升"
       ],
       "metrics": [],
-      "demoNote": "静态体验版已填充样例语料、选题与对标表，可切换三个步骤演示。",
+      "demoNote": "静态体验版对齐原项目界面：可切小红书/视频号/选题情报，展开脚本、模拟提取、生成选题文案。",
       "demoUrl": "./demos/topic-ai/index.html",
       "demoLabel": "打开静态交互示意",
       "images": [

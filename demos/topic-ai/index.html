@@ -6,149 +6,525 @@
   <title>社媒选题与创作工具 · 静态体验版</title>
   <style>
     :root {
-      --bg:#f4f8ff; --panel:#fff; --panel2:#f3f7ff; --border:#d9e6ff;
-      --text:#183052; --muted:#6b84ab; --accent:#2f7bff; --ok:#22b07d; --shadow:0 14px 34px rgba(40,96,180,.12);
+      --bg:#f4f8ff; --panel:#fff; --panel-2:#f3f7ff; --border:#d9e6ff;
+      --text:#183052; --muted:#6b84ab; --accent:#2f7bff; --accent-2:#67a2ff;
+      --ok:#22b07d; --err:#eb5757; --shadow:0 14px 34px rgba(40,96,180,.12); --radius:14px;
     }
     *{box-sizing:border-box}
-    body{margin:0;min-height:100vh;font-family:"PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);
-      background:radial-gradient(1100px 520px at 0% -10%,rgba(47,123,255,.12),transparent 60%),var(--bg)}
-    .wrap{max-width:1100px;margin:0 auto;padding:28px 18px 56px}
-    header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
-    .brand{display:flex;gap:12px;align-items:center}
-    .logo{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:800;
-      background:linear-gradient(135deg,#2f7bff,#ff8a65);box-shadow:var(--shadow)}
-    h1{margin:0;font-size:1.3rem}
-    .sub{margin:4px 0 0;color:var(--muted);font-size:.88rem}
-    .badge{padding:6px 12px;border-radius:999px;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#1a1a1a;font-size:.82rem;font-weight:600}
-    .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--border);
-      border-radius:12px;padding:10px 14px;margin-bottom:14px;box-shadow:var(--shadow);font-size:.9rem}
-    .ok{color:var(--ok);font-weight:600}
+    body{
+      margin:0;min-height:100vh;color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+      background:
+        radial-gradient(1100px 520px at 0% -10%,rgba(47,123,255,.12),transparent 60%),
+        radial-gradient(900px 480px at 100% 0%,rgba(103,162,255,.12),transparent 58%),
+        var(--bg);
+    }
+    .wrap{max-width:1180px;margin:0 auto;padding:28px 18px 56px}
+    header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{
+      width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:800;
+      background:linear-gradient(135deg,var(--accent),#ff8a65);box-shadow:var(--shadow);
+    }
+    h1{margin:0;font-size:1.4rem}
+    .sub{margin:4px 0 0;color:var(--muted);font-size:.9rem}
+    .badge{
+      padding:6px 12px;border-radius:999px;font-size:.82rem;font-weight:600;
+      background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#1a1a1a;
+    }
+    .status{
+      display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px;
+      padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius);
+      background:linear-gradient(180deg,#fff,#f6f9ff);box-shadow:var(--shadow);font-size:.9rem;
+    }
+    .ok{color:var(--ok);font-weight:700}
+    .bad{color:var(--err);font-weight:600}
     .muted{color:var(--muted)}
-    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-    .tab{border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 16px;cursor:pointer}
-    .tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
-    .panel{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
-    .panel h2{margin:0 0 12px;font-size:1.05rem}
-    .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:10px 0 14px}
-    @media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr)}}
-    .stat{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
-    .stat b{display:block;font-size:1.3rem;color:var(--accent)}
-    .stat span{font-size:.78rem;color:var(--muted)}
-    .card{border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;background:linear-gradient(180deg,#fff,var(--panel2))}
-    .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.75rem;background:rgba(47,123,255,.1);color:var(--accent);margin-right:6px}
-    .pill.g{background:rgba(34,176,125,.12);color:var(--ok)}
+    .platform-tabs,.intel-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+    .ptab,.itab{
+      padding:8px 18px;border-radius:999px;border:1px solid var(--border);
+      background:var(--panel);cursor:pointer;font-size:.9rem;
+    }
+    .ptab.active,.itab.active{
+      border-color:rgba(47,123,255,.45);background:rgba(47,123,255,.14);color:#1d4ed8;font-weight:600;
+    }
+    .itab.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 8px 18px rgba(47,123,255,.25)}
+    .panel{
+      background:rgba(255,255,255,.95);border:1px solid var(--border);border-radius:var(--radius);
+      box-shadow:var(--shadow);margin-bottom:14px;
+    }
+    .panel-head{padding:14px 18px 0;font-weight:700}
+    .panel-body{padding:12px 18px 18px}
+    .grid{display:grid;grid-template-columns:380px 1fr;gap:18px}
+    @media(max-width:960px){.grid{grid-template-columns:1fr}}
+    textarea,input,select{
+      width:100%;border:1px solid var(--border);border-radius:12px;background:var(--panel-2);
+      color:var(--text);padding:10px 12px;font-size:.92rem;outline:none;
+    }
+    textarea{min-height:160px;resize:vertical;line-height:1.55}
+    textarea:focus,input:focus,select:focus{border-color:rgba(47,123,255,.55)}
+    .hint{margin-top:8px;color:var(--muted);font-size:.84rem;line-height:1.5}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    button{
+      border:none;border-radius:10px;padding:10px 16px;font-size:.9rem;font-weight:600;cursor:pointer;
+      transition:transform .12s ease,box-shadow .2s ease,opacity .15s;
+    }
+    button:hover:not(:disabled){transform:translateY(-1px)}
+    button:disabled{opacity:.55;cursor:not-allowed}
+    .btn{background:#fff;border:1px solid var(--border);color:var(--text)}
+    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 10px 24px rgba(47,123,255,.24)}
+    .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
+    .return-grid{display:grid;grid-template-columns:repeat(5,minmax(100px,1fr));gap:10px;margin:10px 0 4px}
+    @media(max-width:900px){.return-grid{grid-template-columns:repeat(2,1fr)}}
+    .return-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:10px;min-height:74px}
+    .return-label{color:var(--muted);font-size:.8rem;margin-bottom:6px}
+    .return-value{font-size:1.45rem;font-weight:700}
+    .card{
+      border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;
+      background:linear-gradient(180deg,#fff,var(--panel-2));transition:box-shadow .2s,border-color .2s;
+    }
+    .card:hover{border-color:rgba(47,123,255,.4);box-shadow:0 8px 20px rgba(15,35,80,.08)}
+    .card.selected{border-color:var(--accent);box-shadow:0 0 0 2px rgba(47,123,255,.15)}
+    .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.74rem;margin-right:6px;background:rgba(47,123,255,.1);color:var(--accent)}
+    .pill.ok{background:rgba(34,176,125,.12);color:var(--ok)}
     .title{font-weight:700;margin:8px 0 6px}
     .desc{margin:0 0 8px;font-size:.9rem;line-height:1.5}
     .meta{color:var(--muted);font-size:.82rem}
-    .script{margin:0;padding:10px 12px;background:#fff;border:1px dashed var(--border);border-radius:10px;font-size:.84rem;line-height:1.55;white-space:pre-wrap;color:#314f78}
+    .script{
+      display:none;margin-top:10px;padding:10px 12px;background:#fff;border:1px dashed var(--border);
+      border-radius:10px;font-size:.84rem;line-height:1.55;white-space:pre-wrap;color:#314f78;
+    }
+    .script.open{display:block;animation:in .2s ease}
+    @keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+    .task{
+      margin-top:12px;padding:12px;border-radius:12px;border:1px solid var(--border);background:rgba(47,123,255,.04);
+    }
+    .task.active{border-color:rgba(255,36,66,.35);background:rgba(255,36,66,.06)}
+    .task.done{border-color:rgba(46,204,113,.35);background:rgba(46,204,113,.06)}
+    .task-bar{height:8px;border-radius:999px;background:rgba(0,0,0,.06);overflow:hidden;margin:8px 0}
+    .task-fill{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#ff2442,#ff6b6b);transition:width .3s}
     .ideas{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
-    .idea{border:1px solid var(--border);border-radius:12px;padding:12px;background:#fff}
+    .idea{border:1px solid var(--border);border-radius:12px;padding:12px;background:#fff;cursor:pointer;transition:.15s}
+    .idea:hover,.idea.on{border-color:rgba(47,123,255,.45);background:var(--panel-2)}
     .idea strong{display:block;margin-bottom:6px}
     .idea p{margin:0;color:var(--muted);font-size:.86rem;line-height:1.5}
     table{width:100%;border-collapse:collapse;font-size:.88rem}
     th,td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left}
     th{color:var(--muted)}
+    .toast{
+      position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);opacity:0;
+      background:#183052;color:#fff;padding:10px 16px;border-radius:999px;font-size:.88rem;
+      transition:.25s;z-index:20;pointer-events:none;
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
     .hide{display:none!important}
-    .foot{text-align:center;color:var(--muted);font-size:.82rem;margin-top:16px}
-    .btn{border:1px solid var(--border);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
-    .btn.p{background:linear-gradient(135deg,#2f7bff,#67a2ff);color:#fff;border:0;font-weight:600}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+    .row input,.row select{width:auto;min-width:160px;flex:1}
+    .copy-box{
+      margin-top:12px;padding:12px;border:1px solid rgba(47,123,255,.22);border-radius:12px;background:rgba(255,255,255,.85);
+    }
+    .foot{text-align:center;color:var(--muted);font-size:.82rem;margin-top:18px}
   </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div class="brand">
-      <div class="logo" id="logo">情</div>
-      <div>
-        <h1>社媒选题与创作工具</h1>
-        <p class="sub">选题依据 → 选择性转录 → 创作选题 → 语料资产</p>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" id="logo">情</div>
+        <div>
+          <h1>社媒选题与创作工具</h1>
+          <p class="sub" id="subtitle">选题依据 → 选择性转录 → 创作选题 → 语料资产</p>
+        </div>
       </div>
-    </div>
-    <div class="badge">v1.7.0 · 静态体验版</div>
-  </header>
+      <div class="badge">v1.7.0 · 静态体验版</div>
+    </header>
 
-  <div class="bar">
-    <span class="ok">演示模式 · 样例已填充</span>
-    <span class="muted">小红书 2 · 视频号 2 · 脚本 3</span>
+    <div class="status">
+      <span id="loginState" class="bad">小红书：演示未登录</span>
+      <button class="btn" type="button" id="btnLogin">登录小红书</button>
+      <span class="muted">视频号: API 模式</span>
+      <button class="btn" type="button" id="btnRefresh">刷新状态</button>
+      <span class="ok" id="demoHint">样例数据已加载 · 可点击交互</span>
+    </div>
+
+    <div class="platform-tabs">
+      <button class="ptab" type="button" data-p="xhs">小红书</button>
+      <button class="ptab" type="button" data-p="channels">视频号</button>
+      <button class="ptab active" type="button" data-p="intel">选题情报</button>
+    </div>
+
+    <!-- 小红书 / 视频号：双栏提取 -->
+    <section id="view-extract" class="hide">
+      <div class="grid">
+        <div class="panel">
+          <div class="panel-head">创建采集任务</div>
+          <div class="panel-body">
+            <label class="hint">每行一个分享链接（演示可点「模拟提取」）</label>
+            <textarea id="urls" placeholder="每行一个分享链接"></textarea>
+            <div class="actions">
+              <button class="btn-primary" type="button" id="btnExtract">模拟提取并转录</button>
+              <button class="btn" type="button" id="btnClear">清空</button>
+            </div>
+            <div class="task" id="taskBox">
+              <div><strong id="taskTitle">等待开始</strong> <span class="muted" id="taskPct">0%</span></div>
+              <div class="task-bar"><div class="task-fill" id="taskFill"></div></div>
+              <div class="hint" id="taskLabel">点击「模拟提取并转录」查看进度动画</div>
+            </div>
+            <p class="hint">静态体验版不连接真实采集；进度与结果均为演示数据。</p>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">提取结果 · <span id="extractPlat">小红书</span></div>
+          <div class="panel-body">
+            <div class="row">
+              <input id="filterExtract" placeholder="筛选标题 / 作者" />
+              <button class="btn" type="button" id="btnFilterExtract">筛选</button>
+            </div>
+            <div id="extractList"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 选题情报 -->
+    <section id="view-intel">
+      <div class="intel-tabs">
+        <button class="itab" type="button" data-i="1">1 获取依据</button>
+        <button class="itab active" type="button" data-i="2">2 选题分析</button>
+        <button class="itab" type="button" data-i="3">3 语料资产</button>
+      </div>
+
+      <section id="intel-1" class="hide">
+        <div class="panel">
+          <div class="panel-head">已保存的采集任务</div>
+          <div class="panel-body">
+            <div class="card selected">
+              <span class="pill ok">演示任务</span><span class="pill">小红书 / 视频号</span>
+              <div class="title">AI 办公工具</div>
+              <p class="desc">关键词：AI、WorkBuddy、Claude · 组合检索 · 已沉淀 4 条依据</p>
+              <div class="actions">
+                <button class="btn-primary" type="button" id="btnRunTopic">模拟运行采集</button>
+                <button class="btn" type="button" onclick="switchIntel('2')">去选题分析 →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">依据列表</div>
+          <div class="panel-body" id="basisList"></div>
+        </div>
+      </section>
+
+      <section id="intel-2">
+        <div class="panel">
+          <div class="panel-head">语料分析与创作选题</div>
+          <div class="panel-body">
+            <div class="row">
+              <select id="corpusFilter">
+                <option value="all">全部已转录语料</option>
+                <option value="小红书">仅小红书</option>
+                <option value="视频号">仅视频号</option>
+              </select>
+              <input id="needInput" value="面向职场新人，讲清 AI Agent 如何远程协作" />
+              <button class="btn-primary" type="button" id="btnGen">按需求生成</button>
+              <button class="btn" type="button" id="btnRefreshCorpus">刷新</button>
+            </div>
+            <div class="return-grid">
+              <div class="return-card"><div class="return-label">有效语料</div><div class="return-value" id="s1">4</div></div>
+              <div class="return-card"><div class="return-label">视频脚本</div><div class="return-value" id="s2">3</div></div>
+              <div class="return-card"><div class="return-label">图片 OCR</div><div class="return-value" id="s3">1</div></div>
+              <div class="return-card"><div class="return-label">小红书 / 视频号</div><div class="return-value" id="s4">2 / 2</div></div>
+              <div class="return-card"><div class="return-label">视频 / 图文</div><div class="return-value" id="s5">3 / 1</div></div>
+            </div>
+            <div id="corpusList" style="margin-top:12px"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">从依据生成创作选题</div>
+          <div class="panel-body">
+            <div class="ideas" id="ideaList"></div>
+            <div class="copy-box hide" id="copyBox">
+              <div class="row" style="justify-content:space-between">
+                <strong id="copyTitle">文案工作台</strong>
+                <button class="btn" type="button" id="btnCopy">复制文案</button>
+              </div>
+              <textarea id="copyDraft" style="min-height:160px;margin-top:8px"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">跨选题对标</div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>维度</th><th>WorkBuddy 上手</th><th>Claude Agent</th><th>提示词拆解</th></tr></thead>
+              <tbody>
+                <tr><td>形态</td><td>教程演示</td><td>观点解读</td><td>清单干货</td></tr>
+                <tr><td>互动</td><td>赞 1.1 万</td><td>评 1394</td><td>藏 4200</td></tr>
+                <tr><td>复用点</td><td>步骤可复制</td><td>场景共鸣</td><td>模板可收藏</td></tr>
+                <tr><td>建议</td><td>效率工具赛道</td><td>AI 资讯赛道</td><td>创作者成长</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="intel-3" class="hide">
+        <div class="panel">
+          <div class="panel-head">语料资产库</div>
+          <div class="panel-body">
+            <div class="row">
+              <input id="assetQ" placeholder="搜索标题 / 作者 / 脚本关键词" />
+              <button class="btn" type="button" id="btnAssetSearch">筛选</button>
+            </div>
+            <div id="assetList"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <p class="foot">静态体验版 · 界面结构对齐 cuddly-guacamole · 支持切台 / 展开脚本 / 模拟提取 / 生成选题文案</p>
   </div>
+  <div class="toast" id="toast"></div>
 
-  <div class="tabs">
-    <button class="tab" type="button" data-t="1">1 获取依据</button>
-    <button class="tab on" type="button" data-t="2">2 选题分析</button>
-    <button class="tab" type="button" data-t="3">3 语料资产</button>
-  </div>
-
-  <section id="p1" class="hide">
-    <div class="panel">
-      <h2>采集任务</h2>
-      <div class="card">
-        <span class="pill g">演示任务</span><span class="pill">小红书 / 视频号</span>
-        <div class="title">AI 办公工具</div>
-        <p class="desc">关键词：AI、WorkBuddy、Claude · 已沉淀 4 条依据</p>
-      </div>
-    </div>
-    <div class="panel"><h2>依据列表</h2><div id="list1"></div></div>
-  </section>
-
-  <section id="p2">
-    <div class="panel">
-      <h2>语料分析与创作选题</h2>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-        <select class="btn"><option>全部已转录语料</option></select>
-        <input class="btn" style="flex:1;min-width:220px" value="面向职场新人，讲清 AI Agent 如何远程协作" />
-        <button class="btn p" type="button">按需求生成</button>
-      </div>
-      <div class="stats">
-        <div class="stat"><b>4</b><span>有效语料</span></div>
-        <div class="stat"><b>3</b><span>视频脚本</span></div>
-        <div class="stat"><b>1</b><span>图片 OCR</span></div>
-        <div class="stat"><b>2 / 2</b><span>小红书 / 视频号</span></div>
-        <div class="stat"><b>3 / 1</b><span>视频 / 图文</span></div>
-      </div>
-      <div id="list2"></div>
-    </div>
-    <div class="panel">
-      <h2>从依据生成创作选题</h2>
-      <div class="ideas">
-        <div class="idea"><strong>选题 A · 1 分钟上手 WorkBuddy</strong><p>钩子：微信远程指挥电脑。结构：安装→双入口→绑定→结果回传。</p></div>
-        <div class="idea"><strong>选题 B · Claude 50% 成功率</strong><p>地铁发指令、电脑整理纪要，解释 Agent 从对话到执行的跃迁。</p></div>
-        <div class="idea"><strong>选题 C · 三招养虾提示词</strong><p>任务列表 / 对话区 / 结果区，导出可复用提示词模板。</p></div>
-      </div>
-    </div>
-    <div class="panel">
-      <h2>跨选题对标</h2>
-      <table>
-        <thead><tr><th>维度</th><th>WorkBuddy</th><th>Claude Agent</th><th>提示词拆解</th></tr></thead>
-        <tbody>
-          <tr><td>形态</td><td>教程演示</td><td>观点解读</td><td>清单干货</td></tr>
-          <tr><td>互动</td><td>赞 1.1 万</td><td>评 1394</td><td>藏 4200</td></tr>
-          <tr><td>复用</td><td>步骤可复制</td><td>场景共鸣</td><td>模板可收藏</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section id="p3" class="hide">
-    <div class="panel"><h2>语料资产库</h2><div id="list3"></div></div>
-  </section>
-
-  <p class="foot">静态体验版 · 面试可切换三个步骤查看样例</p>
-</div>
 <script>
-const DATA=[
-  {p:'小红书',t:'视频',a:'陈兴AI',title:'体验腾讯 WorkBuddy：1 分钟让 AI 入驻工作流',desc:'#AI #WorkBuddy 微信远程指挥电脑',m:'赞 1.1万 · 藏 1327 · 评 40',s:'今天上手 WorkBuddy：下载安装后有代码开发/日常工作两个入口。扫码绑定微信，手机发指令，电脑自动执行并把结果回传。'},
-  {p:'小红书',t:'图文',a:'AI观察员',title:'Claude 4 发布：50% 成功率为何让行业睡不着',desc:'AI 编程助手能力跃迁 + 实操清单',m:'赞 8520 · 藏 4200 · 评 318',s:'（OCR）Claude 4 · SWE-bench 50%\n从对话到真正替你操作电脑，是复杂任务上的一次跃迁。'},
-  {p:'视频号',t:'视频',a:'飞枢科创',title:'50%的成功率，为什么已经让整个行业睡不着了',desc:'手机指挥家里 Mac 替你干活',m:'赞 1236 · 藏 69 · 评 1394',s:'没有发布会，只有一条推文。地铁上对 Claude 说整理会议纪要，电脑 Agent 自动执行，结果回到手机。'},
-  {p:'视频号',t:'视频',a:'噗噗Ning-AI',title:'WorkBuddy 深度拆解：三招养虾 + 独家提示词',desc:'1 分钟让 AI 入驻工作流',m:'赞 980 · 藏 512 · 评 86',s:'三招：定任务列表 → 对话下达 → 结果区验收。提示词模板可直接复制复用。'}
+const DATA = [
+  {id:'x1', platform:'小红书', type:'视频', author:'陈兴AI', title:'体验腾讯 WorkBuddy：1 分钟让 AI 入驻工作流',
+   desc:'#AI #WorkBuddy 不用写代码，微信也能远程指挥电脑干活。', liked:'1.1万', collected:'1327', comment:'40',
+   script:'腾讯版 OpenClaw 来了，今天上手 WorkBuddy。\n下载安装后有两个入口：代码开发、日常工作。\n扫码绑定微信后，手机发一条消息，电脑自动执行并把结果回传手机。'},
+  {id:'x2', platform:'小红书', type:'图文', author:'AI观察员', title:'Claude 4 发布：50% 成功率为何让整个行业睡不着',
+   desc:'深度解读 AI 编程助手能力跃迁，附实操清单。', liked:'8520', collected:'4200', comment:'318',
+   script:'（OCR）Claude 4 · SWE-bench 50%\n从对话到真正替你操作电脑，是复杂软件工程任务上的一次跃迁。'},
+  {id:'c1', platform:'视频号', type:'视频', author:'飞枢科创', title:'50%的成功率，为什么已经让整个行业睡不着了 #Claude',
+   desc:'从手机指挥家里 Mac 替你干活。', liked:'1236', collected:'69', comment:'1394',
+   script:'没有发布会，只有一条推文。\n地铁上对 Claude 说：整理昨天会议纪要。\n电脑 Agent 自动执行，结果回到手机。'},
+  {id:'c2', platform:'视频号', type:'视频', author:'噗噗Ning-AI', title:'腾讯 WorkBuddy 深度拆解：三招养虾 + 独家提示词',
+   desc:'不用写代码，1 分钟让 AI 入驻工作流。', liked:'980', collected:'512', comment:'86',
+   script:'三招养虾：定任务列表 → 对话下达 → 结果区验收。\n提示词模板可直接复制到你的工作流复用。'}
 ];
-function card(i,show){return `<article class="card"><span class="pill">${i.p}</span><span class="pill">${i.t}</span><span class="pill g">已转录</span><div class="title">${i.title}</div><p class="desc">${i.desc} · ${i.a}</p><div class="meta">${i.m}</div>${show?`<pre class="script">${i.s}</pre>`:''}</article>`}
-function fill(){const h=DATA.map(i=>card(i,false)).join('');const hs=DATA.map(i=>card(i,true)).join('');
-  list1.innerHTML=h;list2.innerHTML=hs;list3.innerHTML=hs}
-function go(t){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
-  p1.classList.toggle('hide',t!=='1');p2.classList.toggle('hide',t!=='2');p3.classList.toggle('hide',t!=='3');
-  logo.textContent=t==='1'?'红':t==='3'?'资':'情'}
-document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>go(b.dataset.t));
-fill();go('2');
+
+const IDEAS = [
+  {t:'选题 A · 1 分钟上手 WorkBuddy', p:'钩子：微信远程指挥电脑。结构：安装→双入口→绑定→结果回传。适合职场效率号。',
+   draft:'【标题】1 分钟让 AI 入驻工作流：WorkBuddy 上手\n【钩子】不用写代码，微信也能远程指挥电脑。\n【结构】\n1. 下载安装\n2. 代码开发 / 日常工作双入口\n3. 扫码绑定微信\n4. 手机发指令，电脑执行并回传\n【CTA】评论区扣 1，发你提示词模板'},
+  {t:'选题 B · Claude 50% 成功率', p:'地铁发指令、电脑整理纪要，解释 Agent 从对话到执行的跃迁。',
+   draft:'【标题】50% 成功率，为什么行业睡不着\n【场景】地铁上说一句「整理会议纪要」\n【观点】从聊天到执行，才是 Agent 分水岭\n【结尾】给你 3 条可立刻试的指令'},
+  {t:'选题 C · 三招养虾提示词', p:'任务列表 / 对话区 / 结果区，导出可复用提示词模板。',
+   draft:'【标题】WorkBuddy 三招养虾\n1) 先写清任务列表\n2) 对话区下达可验收指令\n3) 结果区逐项核对\n【福利】文末领取提示词模板'}
+];
+
+let platform = 'intel';
+let intelTab = '2';
+let loggedIn = false;
+let openScripts = new Set();
+
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(()=>el.classList.remove('show'), 1800);
+}
+
+function cardHtml(item, {selectable=false, selected=false}={}){
+  const open = openScripts.has(item.id);
+  return `<article class="card ${selected?'selected':''}" data-id="${item.id}">
+    <span class="pill">${item.platform}</span><span class="pill">${item.type}</span><span class="pill ok">已转录</span>
+    <div class="title">${item.title}</div>
+    <p class="desc">${item.desc} · ${item.author}</p>
+    <div class="meta">赞 ${item.liked} · 藏 ${item.collected} · 评 ${item.comment}</div>
+    <div class="actions">
+      <button class="btn" type="button" data-act="toggle" data-id="${item.id}">${open?'收起脚本':'展开脚本'}</button>
+      <button class="btn" type="button" data-act="copy" data-id="${item.id}">复制脚本</button>
+      ${selectable?`<button class="btn-primary" type="button" data-act="pick" data-id="${item.id}">选为分析对象</button>`:''}
+    </div>
+    <pre class="script ${open?'open':''}">${item.script}</pre>
+  </article>`;
+}
+
+function filtered(platformFilter, q){
+  return DATA.filter(i=>{
+    if(platformFilter && platformFilter!=='all' && i.platform!==platformFilter) return false;
+    if(!q) return true;
+    const blob = i.title+i.author+i.script+i.desc;
+    return blob.includes(q);
+  });
+}
+
+function renderExtract(){
+  const plat = platform==='channels'?'视频号':'小红书';
+  document.getElementById('extractPlat').textContent = plat;
+  const q = document.getElementById('filterExtract').value.trim();
+  const list = filtered(plat, q);
+  document.getElementById('extractList').innerHTML = list.map(i=>cardHtml(i)).join('') || '<p class="hint">无匹配结果</p>';
+}
+
+function renderBasis(){
+  document.getElementById('basisList').innerHTML = DATA.map(i=>cardHtml(i)).join('');
+}
+
+function renderCorpus(){
+  const f = document.getElementById('corpusFilter').value;
+  const list = filtered(f==='all'?null:f, '');
+  document.getElementById('s1').textContent = list.length;
+  document.getElementById('s2').textContent = list.filter(i=>i.type==='视频').length;
+  document.getElementById('s3').textContent = list.filter(i=>i.script.includes('OCR')).length;
+  const xhs = list.filter(i=>i.platform==='小红书').length;
+  const ch = list.filter(i=>i.platform==='视频号').length;
+  document.getElementById('s4').textContent = `${xhs} / ${ch}`;
+  document.getElementById('s5').textContent = `${list.filter(i=>i.type==='视频').length} / ${list.filter(i=>i.type==='图文').length}`;
+  document.getElementById('corpusList').innerHTML = list.map(i=>cardHtml(i,{selectable:true})).join('');
+}
+
+function renderIdeas(){
+  document.getElementById('ideaList').innerHTML = IDEAS.map((idea,idx)=>`
+    <div class="idea" data-idea="${idx}">
+      <strong>${idea.t}</strong>
+      <p>${idea.p}</p>
+    </div>`).join('');
+}
+
+function renderAssets(){
+  const q = document.getElementById('assetQ').value.trim();
+  const list = filtered(null, q);
+  document.getElementById('assetList').innerHTML = list.map(i=>cardHtml(i)).join('') || '<p class="hint">无匹配资产</p>';
+}
+
+function switchPlatform(p){
+  platform = p;
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.toggle('active', b.dataset.p===p));
+  const logo = document.getElementById('logo');
+  const sub = document.getElementById('subtitle');
+  if(p==='intel'){
+    document.getElementById('view-extract').classList.add('hide');
+    document.getElementById('view-intel').classList.remove('hide');
+    logo.textContent='情'; sub.textContent='选题依据 → 选择性转录 → 创作选题 → 语料资产';
+  } else {
+    document.getElementById('view-intel').classList.add('hide');
+    document.getElementById('view-extract').classList.remove('hide');
+    logo.textContent = p==='channels'?'号':'红';
+    sub.textContent = p==='channels'?'微信视频号 · 关键词发现 + 口播转写':'小红书 · 关键词/账号发现 + 链接提取';
+    document.getElementById('urls').value = p==='channels'
+      ? 'https://weixin.qq.com/sph/demo001\nhttps://weixin.qq.com/sph/demo002'
+      : 'https://www.xiaohongshu.com/explore/demo001\nhttps://www.xiaohongshu.com/explore/demo002';
+    renderExtract();
+  }
+}
+
+function switchIntel(i){
+  intelTab = i;
+  document.querySelectorAll('.itab').forEach(b=>b.classList.toggle('active', b.dataset.i===i));
+  ['1','2','3'].forEach(n=>{
+    document.getElementById('intel-'+n).classList.toggle('hide', n!==i);
+  });
+  if(i==='1') renderBasis();
+  if(i==='2'){ renderCorpus(); renderIdeas(); }
+  if(i==='3') renderAssets();
+}
+
+function onCardClick(e){
+  const btn = e.target.closest('button[data-act]');
+  if(!btn) return;
+  const item = DATA.find(d=>d.id===btn.dataset.id);
+  if(!item) return;
+  if(btn.dataset.act==='toggle'){
+    if(openScripts.has(item.id)) openScripts.delete(item.id); else openScripts.add(item.id);
+    refreshCurrentLists();
+  }
+  if(btn.dataset.act==='copy'){
+    navigator.clipboard?.writeText(item.script).then(()=>toast('脚本已复制')).catch(()=>toast('复制失败，请手动选择'));
+  }
+  if(btn.dataset.act==='pick'){
+    document.getElementById('needInput').value = `基于「${item.title}」产出一条职场向短视频脚本`;
+    document.getElementById('copyBox').classList.remove('hide');
+    document.getElementById('copyTitle').textContent = '文案工作台 · '+item.author;
+    document.getElementById('copyDraft').value = `参考语料：${item.title}\n\n${item.script}\n\n——\n请改写成 45 秒口播，保留钩子与 CTA。`;
+    toast('已选为分析对象');
+    document.getElementById('copyBox').scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+}
+
+function refreshCurrentLists(){
+  if(platform!=='intel') renderExtract();
+  else if(intelTab==='1') renderBasis();
+  else if(intelTab==='2') renderCorpus();
+  else renderAssets();
+}
+
+function simulateExtract(){
+  const box = document.getElementById('taskBox');
+  const fill = document.getElementById('taskFill');
+  const title = document.getElementById('taskTitle');
+  const pct = document.getElementById('taskPct');
+  const label = document.getElementById('taskLabel');
+  const btn = document.getElementById('btnExtract');
+  btn.disabled = true;
+  box.className = 'task active';
+  let n = 0;
+  const steps = ['解析链接…','拉取正文…','语音转写…','写入语料库…','完成'];
+  const timer = setInterval(()=>{
+    n += 20;
+    fill.style.width = n+'%';
+    pct.textContent = n+'%';
+    title.textContent = n>=100 ? '提取完成' : '提取中';
+    label.textContent = steps[Math.min(Math.floor(n/20), steps.length-1)];
+    if(n>=100){
+      clearInterval(timer);
+      box.className = 'task done';
+      btn.disabled = false;
+      toast('演示提取完成 · 右侧已是样例结果');
+      renderExtract();
+    }
+  }, 280);
+}
+
+document.querySelectorAll('.ptab').forEach(b=>b.onclick=()=>switchPlatform(b.dataset.p));
+document.querySelectorAll('.itab').forEach(b=>b.onclick=()=>switchIntel(b.dataset.i));
+document.body.addEventListener('click', onCardClick);
+document.getElementById('btnExtract').onclick = simulateExtract;
+document.getElementById('btnClear').onclick = ()=>{ document.getElementById('urls').value=''; toast('已清空输入'); };
+document.getElementById('btnFilterExtract').onclick = renderExtract;
+document.getElementById('filterExtract').oninput = renderExtract;
+document.getElementById('corpusFilter').onchange = renderCorpus;
+document.getElementById('btnRefreshCorpus').onclick = ()=>{ renderCorpus(); toast('语料已刷新'); };
+document.getElementById('btnAssetSearch').onclick = renderAssets;
+document.getElementById('assetQ').oninput = renderAssets;
+document.getElementById('btnLogin').onclick = ()=>{
+  loggedIn = !loggedIn;
+  document.getElementById('loginState').textContent = loggedIn ? '小红书：已登录（演示）' : '小红书：演示未登录';
+  document.getElementById('loginState').className = loggedIn ? 'ok' : 'bad';
+  document.getElementById('btnLogin').textContent = loggedIn ? '退出登录' : '登录小红书';
+  toast(loggedIn ? '演示登录成功' : '已退出登录');
+};
+document.getElementById('btnRefresh').onclick = ()=>toast('状态已刷新（演示）');
+document.getElementById('btnRunTopic').onclick = ()=>{
+  toast('模拟采集完成 · 4 条依据已就绪');
+  switchIntel('2');
+};
+document.getElementById('btnGen').onclick = ()=>{
+  const need = document.getElementById('needInput').value.trim() || '职场 AI 效率';
+  document.getElementById('copyBox').classList.remove('hide');
+  document.getElementById('copyTitle').textContent = '文案工作台 · 按需求生成';
+  document.getElementById('copyDraft').value = `【需求】${need}\n\n${IDEAS[0].draft}`;
+  document.querySelectorAll('.idea').forEach((el,i)=>el.classList.toggle('on', i===0));
+  toast('已生成 3 个选题方向');
+  document.getElementById('copyBox').scrollIntoView({behavior:'smooth', block:'nearest'});
+};
+document.getElementById('ideaList').addEventListener('click', e=>{
+  const idea = e.target.closest('[data-idea]');
+  if(!idea) return;
+  const idx = Number(idea.dataset.idea);
+  document.querySelectorAll('.idea').forEach(el=>el.classList.toggle('on', el===idea));
+  document.getElementById('copyBox').classList.remove('hide');
+  document.getElementById('copyTitle').textContent = IDEAS[idx].t;
+  document.getElementById('copyDraft').value = IDEAS[idx].draft;
+  toast('已载入选题文案');
+});
+document.getElementById('btnCopy').onclick = ()=>{
+  const t = document.getElementById('copyDraft').value;
+  navigator.clipboard?.writeText(t).then(()=>toast('文案已复制')).catch(()=>toast('请手动复制'));
+};
+
+switchPlatform('intel');
+switchIntel('2');
 </script>
 </body>
 </html>
