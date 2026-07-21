@@ -488,7 +488,7 @@ window.DEFAULT_CONTENT = {
         "内容生产效率提升"
       ],
       "metrics": [],
-      "demoNote": "完整体验包已接入作品集：线上可浏览样例界面；本机可运行 demos/topic-ai/start-demo.ps1 启动完整服务。",
+      "demoNote": "静态体验版已填充样例语料、选题与对标表，可切换三个步骤演示。",
       "demoUrl": "./demos/topic-ai/index.html",
       "demoLabel": "打开静态交互示意",
       "images": [

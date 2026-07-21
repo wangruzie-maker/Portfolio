@@ -1,28 +1,154 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>社媒选题与创作工具 · 体验版</title>
-    <meta http-equiv="refresh" content="0; url=static/index.html?demo=1" />
-    <link rel="canonical" href="static/index.html?demo=1" />
-    <style>
-      body {
-        margin: 0;
-        min-height: 100vh;
-        display: grid;
-        place-items: center;
-        font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-        background: #f4f8ff;
-        color: #183052;
-      }
-      a {
-        color: #2f7bff;
-        font-size: 1.05rem;
-      }
-    </style>
-  </head>
-  <body>
-    <p>正在打开体验版… <a href="static/index.html?demo=1">若未跳转请点此进入</a></p>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>社媒选题与创作工具 · 静态体验版</title>
+  <style>
+    :root {
+      --bg:#f4f8ff; --panel:#fff; --panel2:#f3f7ff; --border:#d9e6ff;
+      --text:#183052; --muted:#6b84ab; --accent:#2f7bff; --ok:#22b07d; --shadow:0 14px 34px rgba(40,96,180,.12);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;font-family:"PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);
+      background:radial-gradient(1100px 520px at 0% -10%,rgba(47,123,255,.12),transparent 60%),var(--bg)}
+    .wrap{max-width:1100px;margin:0 auto;padding:28px 18px 56px}
+    header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:800;
+      background:linear-gradient(135deg,#2f7bff,#ff8a65);box-shadow:var(--shadow)}
+    h1{margin:0;font-size:1.3rem}
+    .sub{margin:4px 0 0;color:var(--muted);font-size:.88rem}
+    .badge{padding:6px 12px;border-radius:999px;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#1a1a1a;font-size:.82rem;font-weight:600}
+    .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--border);
+      border-radius:12px;padding:10px 14px;margin-bottom:14px;box-shadow:var(--shadow);font-size:.9rem}
+    .ok{color:var(--ok);font-weight:600}
+    .muted{color:var(--muted)}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+    .tab{border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 16px;cursor:pointer}
+    .tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .panel{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+    .panel h2{margin:0 0 12px;font-size:1.05rem}
+    .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:10px 0 14px}
+    @media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr)}}
+    .stat{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+    .stat b{display:block;font-size:1.3rem;color:var(--accent)}
+    .stat span{font-size:.78rem;color:var(--muted)}
+    .card{border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;background:linear-gradient(180deg,#fff,var(--panel2))}
+    .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.75rem;background:rgba(47,123,255,.1);color:var(--accent);margin-right:6px}
+    .pill.g{background:rgba(34,176,125,.12);color:var(--ok)}
+    .title{font-weight:700;margin:8px 0 6px}
+    .desc{margin:0 0 8px;font-size:.9rem;line-height:1.5}
+    .meta{color:var(--muted);font-size:.82rem}
+    .script{margin:0;padding:10px 12px;background:#fff;border:1px dashed var(--border);border-radius:10px;font-size:.84rem;line-height:1.55;white-space:pre-wrap;color:#314f78}
+    .ideas{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+    .idea{border:1px solid var(--border);border-radius:12px;padding:12px;background:#fff}
+    .idea strong{display:block;margin-bottom:6px}
+    .idea p{margin:0;color:var(--muted);font-size:.86rem;line-height:1.5}
+    table{width:100%;border-collapse:collapse;font-size:.88rem}
+    th,td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left}
+    th{color:var(--muted)}
+    .hide{display:none!important}
+    .foot{text-align:center;color:var(--muted);font-size:.82rem;margin-top:16px}
+    .btn{border:1px solid var(--border);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
+    .btn.p{background:linear-gradient(135deg,#2f7bff,#67a2ff);color:#fff;border:0;font-weight:600}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo" id="logo">情</div>
+      <div>
+        <h1>社媒选题与创作工具</h1>
+        <p class="sub">选题依据 → 选择性转录 → 创作选题 → 语料资产</p>
+      </div>
+    </div>
+    <div class="badge">v1.7.0 · 静态体验版</div>
+  </header>
+
+  <div class="bar">
+    <span class="ok">演示模式 · 样例已填充</span>
+    <span class="muted">小红书 2 · 视频号 2 · 脚本 3</span>
+  </div>
+
+  <div class="tabs">
+    <button class="tab" type="button" data-t="1">1 获取依据</button>
+    <button class="tab on" type="button" data-t="2">2 选题分析</button>
+    <button class="tab" type="button" data-t="3">3 语料资产</button>
+  </div>
+
+  <section id="p1" class="hide">
+    <div class="panel">
+      <h2>采集任务</h2>
+      <div class="card">
+        <span class="pill g">演示任务</span><span class="pill">小红书 / 视频号</span>
+        <div class="title">AI 办公工具</div>
+        <p class="desc">关键词：AI、WorkBuddy、Claude · 已沉淀 4 条依据</p>
+      </div>
+    </div>
+    <div class="panel"><h2>依据列表</h2><div id="list1"></div></div>
+  </section>
+
+  <section id="p2">
+    <div class="panel">
+      <h2>语料分析与创作选题</h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <select class="btn"><option>全部已转录语料</option></select>
+        <input class="btn" style="flex:1;min-width:220px" value="面向职场新人，讲清 AI Agent 如何远程协作" />
+        <button class="btn p" type="button">按需求生成</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><b>4</b><span>有效语料</span></div>
+        <div class="stat"><b>3</b><span>视频脚本</span></div>
+        <div class="stat"><b>1</b><span>图片 OCR</span></div>
+        <div class="stat"><b>2 / 2</b><span>小红书 / 视频号</span></div>
+        <div class="stat"><b>3 / 1</b><span>视频 / 图文</span></div>
+      </div>
+      <div id="list2"></div>
+    </div>
+    <div class="panel">
+      <h2>从依据生成创作选题</h2>
+      <div class="ideas">
+        <div class="idea"><strong>选题 A · 1 分钟上手 WorkBuddy</strong><p>钩子：微信远程指挥电脑。结构：安装→双入口→绑定→结果回传。</p></div>
+        <div class="idea"><strong>选题 B · Claude 50% 成功率</strong><p>地铁发指令、电脑整理纪要，解释 Agent 从对话到执行的跃迁。</p></div>
+        <div class="idea"><strong>选题 C · 三招养虾提示词</strong><p>任务列表 / 对话区 / 结果区，导出可复用提示词模板。</p></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>跨选题对标</h2>
+      <table>
+        <thead><tr><th>维度</th><th>WorkBuddy</th><th>Claude Agent</th><th>提示词拆解</th></tr></thead>
+        <tbody>
+          <tr><td>形态</td><td>教程演示</td><td>观点解读</td><td>清单干货</td></tr>
+          <tr><td>互动</td><td>赞 1.1 万</td><td>评 1394</td><td>藏 4200</td></tr>
+          <tr><td>复用</td><td>步骤可复制</td><td>场景共鸣</td><td>模板可收藏</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="p3" class="hide">
+    <div class="panel"><h2>语料资产库</h2><div id="list3"></div></div>
+  </section>
+
+  <p class="foot">静态体验版 · 面试可切换三个步骤查看样例</p>
+</div>
+<script>
+const DATA=[
+  {p:'小红书',t:'视频',a:'陈兴AI',title:'体验腾讯 WorkBuddy：1 分钟让 AI 入驻工作流',desc:'#AI #WorkBuddy 微信远程指挥电脑',m:'赞 1.1万 · 藏 1327 · 评 40',s:'今天上手 WorkBuddy：下载安装后有代码开发/日常工作两个入口。扫码绑定微信，手机发指令，电脑自动执行并把结果回传。'},
+  {p:'小红书',t:'图文',a:'AI观察员',title:'Claude 4 发布：50% 成功率为何让行业睡不着',desc:'AI 编程助手能力跃迁 + 实操清单',m:'赞 8520 · 藏 4200 · 评 318',s:'（OCR）Claude 4 · SWE-bench 50%\n从对话到真正替你操作电脑，是复杂任务上的一次跃迁。'},
+  {p:'视频号',t:'视频',a:'飞枢科创',title:'50%的成功率，为什么已经让整个行业睡不着了',desc:'手机指挥家里 Mac 替你干活',m:'赞 1236 · 藏 69 · 评 1394',s:'没有发布会，只有一条推文。地铁上对 Claude 说整理会议纪要，电脑 Agent 自动执行，结果回到手机。'},
+  {p:'视频号',t:'视频',a:'噗噗Ning-AI',title:'WorkBuddy 深度拆解：三招养虾 + 独家提示词',desc:'1 分钟让 AI 入驻工作流',m:'赞 980 · 藏 512 · 评 86',s:'三招：定任务列表 → 对话下达 → 结果区验收。提示词模板可直接复制复用。'}
+];
+function card(i,show){return `<article class="card"><span class="pill">${i.p}</span><span class="pill">${i.t}</span><span class="pill g">已转录</span><div class="title">${i.title}</div><p class="desc">${i.desc} · ${i.a}</p><div class="meta">${i.m}</div>${show?`<pre class="script">${i.s}</pre>`:''}</article>`}
+function fill(){const h=DATA.map(i=>card(i,false)).join('');const hs=DATA.map(i=>card(i,true)).join('');
+  list1.innerHTML=h;list2.innerHTML=hs;list3.innerHTML=hs}
+function go(t){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  p1.classList.toggle('hide',t!=='1');p2.classList.toggle('hide',t!=='2');p3.classList.toggle('hide',t!=='3');
+  logo.textContent=t==='1'?'红':t==='3'?'资':'情'}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>go(b.dataset.t));
+fill();go('2');
+</script>
+</body>
 </html>
