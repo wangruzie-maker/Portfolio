@@ -3,6 +3,11 @@ sync-inbox/*.json
 sync-inbox/_*.txt
 *.bak
 
+# Topic tool local runtime
+demos/topic-ai/output/
+demos/topic-ai/.venv/
+demos/topic-ai-old-backup/
+
 # OS / editor
 .DS_Store
 Thumbs.db
