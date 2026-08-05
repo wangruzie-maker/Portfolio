@@ -1,16 +1,57 @@
 /**
  * Resume editor — 承接 Portfolio GitHub 版能力：
- * 文案 contentEditable · 本机 localStorage · ?edit=1 · 模块显隐
+ * 文案 contentEditable · 本机 localStorage · 密码解锁后才显示编辑入口
+ * 解锁：Cmd/Ctrl+Shift+E，或连点左上角品牌 5 次，输入密码
  */
 (function () {
   "use strict";
 
   const STORAGE_KEY = "ivory-portfolio-edits-v1";
+  const AUTH_KEY = "ivory-edit-auth";
+  const EDIT_PASS = "020410";
   const TOGGLEABLE = [
     { id: "journey", label: "Journey 经历" },
     { id: "lab", label: "Lab 工具" },
     { id: "work", label: "Work 作品" },
   ];
+
+  function isAuthed() {
+    return sessionStorage.getItem(AUTH_KEY) === "1";
+  }
+
+  function setAuthed(on) {
+    if (on) sessionStorage.setItem(AUTH_KEY, "1");
+    else sessionStorage.removeItem(AUTH_KEY);
+    syncAuthUI();
+  }
+
+  function syncAuthUI() {
+    const ok = isAuthed();
+    document.body.classList.toggle("is-edit-authed", ok);
+    const root = document.querySelector("[data-edit-root]");
+    const topBtn = document.querySelector("#editBtn");
+    if (root) root.hidden = !ok;
+    if (topBtn) topBtn.hidden = !ok;
+    if (!ok && document.body.classList.contains("is-editing")) {
+      setEditMode(false);
+    }
+  }
+
+  function askPassword() {
+    const input = window.prompt("请输入编辑密码");
+    if (input === null) return false;
+    if (String(input).trim() === EDIT_PASS) {
+      setAuthed(true);
+      return true;
+    }
+    window.alert("密码不正确");
+    return false;
+  }
+
+  function requireAuth() {
+    if (isAuthed()) return true;
+    return askPassword();
+  }
 
   function loadEdits() {
     try {
@@ -57,6 +98,7 @@
   }
 
   function wantEditMode() {
+    if (!isAuthed()) return false;
     const params = new URLSearchParams(window.location.search);
     if (params.get("edit") === "1") return true;
     if (params.get("edit") === "0") return false;
@@ -68,6 +110,7 @@
     const root = document.createElement("div");
     root.className = "edit-chrome";
     root.setAttribute("data-edit-root", "");
+    root.hidden = !isAuthed();
     root.innerHTML = `
       <div class="edit-panel" data-edit-panel hidden>
         <p class="edit-hint">编辑：改文字 · 自动保存在本机。链接与飞书 URL 上传仓库后生效。清空可恢复默认文案。</p>
@@ -75,6 +118,7 @@
       </div>
       <button type="button" class="edit-fab" data-edit-toggle aria-pressed="false">编辑内容</button>
       <button type="button" class="edit-fab" data-edit-reset hidden style="background:transparent;color:var(--jade)">清空本地修改</button>
+      <button type="button" class="edit-fab" data-edit-lock hidden style="background:transparent;color:var(--ink-3)">锁定编辑</button>
     `;
     document.body.appendChild(root);
 
@@ -87,12 +131,18 @@
     `).join("");
 
     root.querySelector("[data-edit-toggle]").addEventListener("click", () => {
+      if (!requireAuth()) return;
       setEditMode(!document.body.classList.contains("is-editing"));
     });
     root.querySelector("[data-edit-reset]").addEventListener("click", () => {
+      if (!requireAuth()) return;
       if (!confirm("清空本机保存的文案修改？")) return;
       localStorage.removeItem(STORAGE_KEY);
       location.reload();
+    });
+    root.querySelector("[data-edit-lock]").addEventListener("click", () => {
+      setEditMode(false);
+      setAuthed(false);
     });
 
     toggles.addEventListener("change", (event) => {
@@ -132,11 +182,13 @@
   }
 
   function setEditMode(on) {
+    if (on && !isAuthed()) return;
     sessionStorage.setItem("ivory-edit-mode", on ? "1" : "0");
     document.body.classList.toggle("is-editing", on);
     const toggle = document.querySelector("[data-edit-toggle]");
     const panel = document.querySelector("[data-edit-panel]");
     const reset = document.querySelector("[data-edit-reset]");
+    const lock = document.querySelector("[data-edit-lock]");
     const topBtn = document.querySelector("#editBtn");
     if (toggle) {
       toggle.setAttribute("aria-pressed", String(on));
@@ -144,12 +196,44 @@
       toggle.classList.toggle("is-on", on);
     }
     if (topBtn) {
+      topBtn.hidden = !isAuthed();
       topBtn.textContent = on ? "完成" : "编辑";
       topBtn.classList.toggle("is-on", on);
     }
     if (panel) panel.hidden = !on;
     if (reset) reset.hidden = !on;
+    if (lock) lock.hidden = !isAuthed();
     bindEditing(on);
+  }
+
+  function bindUnlockGestures() {
+    document.addEventListener("keydown", (event) => {
+      if (!(event.metaKey || event.ctrlKey) || !event.shiftKey) return;
+      if (event.key.toLowerCase() !== "e") return;
+      event.preventDefault();
+      if (!requireAuth()) return;
+      setEditMode(true);
+    });
+
+    let brandClicks = 0;
+    let brandTimer = null;
+    document.addEventListener("click", (event) => {
+      const brand = event.target.closest(".brand");
+      if (!brand) return;
+      brandClicks += 1;
+      clearTimeout(brandTimer);
+      brandTimer = setTimeout(() => { brandClicks = 0; }, 1200);
+      if (brandClicks < 5) return;
+      brandClicks = 0;
+      if (!requireAuth()) return;
+      setEditMode(true);
+    });
+
+    // ?edit=1 也需先过密码
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("edit") === "1" && !isAuthed()) {
+      if (requireAuth()) setEditMode(true);
+    }
   }
 
   function bindEditing(on) {
@@ -237,22 +321,25 @@
   }
 
   window.__resumeToggleEdit = function () {
+    if (!requireAuth()) return;
     setEditMode(!document.body.classList.contains("is-editing"));
   };
   window.__resumeBindEdit = function () {
     if (document.body.classList.contains("is-editing")) bindEditing(true);
   };
 
-  applyEditsToContent();
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => {
-      mountChrome();
-      applyHiddenModules();
-      if (wantEditMode()) setEditMode(true);
-    });
-  } else {
+  function boot() {
     mountChrome();
     applyHiddenModules();
+    syncAuthUI();
+    bindUnlockGestures();
     if (wantEditMode()) setEditMode(true);
+  }
+
+  applyEditsToContent();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
   }
 })();
