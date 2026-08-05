@@ -93,7 +93,15 @@
       C.education = C.education.map((e) => ({ ...e, ...(edits.education[e.id] || {}) }));
     }
     if (edits.works && C.works) {
-      C.works = C.works.map((w) => ({ ...w, ...(edits.works[w.id] || {}) }));
+      C.works = C.works.map((w) => {
+        const patch = edits.works[w.id] || {};
+        const { images: imgPatch, ...rest } = patch;
+        let images = w.images || [];
+        if (imgPatch && typeof imgPatch === "object") {
+          images = images.map((img, i) => ({ ...img, ...(imgPatch[i] || {}) }));
+        }
+        return { ...w, ...rest, images };
+      });
     }
     if (edits.experiences && C.experiences) {
       C.experiences = C.experiences.map((exp) => {
@@ -103,15 +111,28 @@
         return {
           ...exp,
           ...rest,
-          modules: (exp.modules || []).map((m) => ({
-            ...m,
-            ...((modPatch && modPatch[m.id]) || {}),
-          })),
+          modules: (exp.modules || []).map((m) => {
+            const mp = (modPatch && modPatch[m.id]) || {};
+            const { images: imgPatch, ...modRest } = mp;
+            let images = m.images || [];
+            if (imgPatch && typeof imgPatch === "object") {
+              images = images.map((img, i) => ({ ...img, ...(imgPatch[i] || {}) }));
+            }
+            return { ...m, ...modRest, images };
+          }),
         };
       });
     }
     if (edits.tools && C.tools) {
-      C.tools = C.tools.map((t) => ({ ...t, ...(edits.tools[t.id] || {}) }));
+      C.tools = C.tools.map((tool) => {
+        const patch = edits.tools[tool.id] || {};
+        const { images: imgPatch, ...rest } = patch;
+        let images = tool.images || [];
+        if (imgPatch && typeof imgPatch === "object") {
+          images = images.map((img, i) => ({ ...img, ...(imgPatch[i] || {}) }));
+        }
+        return { ...tool, ...rest, images };
+      });
     }
   }
 
@@ -418,6 +439,63 @@
         edits.tools[id] = { ...(edits.tools[id] || {}), [field]: value };
         const tool = (window.DEFAULT_CONTENT.tools || []).find((t) => t.id === id);
         if (tool) tool[field] = value;
+        saveEdits(edits);
+      });
+    });
+
+    document.querySelectorAll("[data-edit-img]").forEach((node) => {
+      node.contentEditable = on ? "true" : "false";
+      if (!on || node.dataset.editBound === "1") return;
+      node.dataset.editBound = "1";
+      node.addEventListener("click", (event) => {
+        if (document.body.classList.contains("is-editing")) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      });
+      node.addEventListener("blur", () => {
+        const key = node.getAttribute("data-edit-img") || "";
+        const value = node.textContent.trim();
+        const parts = key.split(".");
+        const edits = loadEdits();
+        const C = window.DEFAULT_CONTENT;
+        if (!C) return;
+
+        if (parts[0] === "exp" && parts.length >= 4) {
+          const [, expId, modId, idxStr] = parts;
+          const idx = Number(idxStr);
+          edits.experiences = edits.experiences || {};
+          edits.experiences[expId] = edits.experiences[expId] || {};
+          edits.experiences[expId].modules = edits.experiences[expId].modules || {};
+          edits.experiences[expId].modules[modId] = edits.experiences[expId].modules[modId] || {};
+          const imgs = edits.experiences[expId].modules[modId].images || {};
+          imgs[idx] = { ...(imgs[idx] || {}), label: value };
+          edits.experiences[expId].modules[modId].images = imgs;
+          const exp = (C.experiences || []).find((e) => e.id === expId);
+          const mod = exp && (exp.modules || []).find((m) => m.id === modId);
+          if (mod && mod.images && mod.images[idx]) mod.images[idx].label = value;
+        } else if (parts[0] === "work" && parts.length >= 3) {
+          const [, workId, idxStr] = parts;
+          const idx = Number(idxStr);
+          edits.works = edits.works || {};
+          edits.works[workId] = edits.works[workId] || {};
+          edits.works[workId].images = edits.works[workId].images || {};
+          edits.works[workId].images[idx] = { ...(edits.works[workId].images[idx] || {}), label: value };
+          const work = (C.works || []).find((w) => w.id === workId);
+          if (work && work.images && work.images[idx]) work.images[idx].label = value;
+        } else if (parts[0] === "tool" && parts.length >= 3) {
+          const [, toolId, idxStr] = parts;
+          const idx = Number(idxStr);
+          edits.tools = edits.tools || {};
+          edits.tools[toolId] = edits.tools[toolId] || {};
+          edits.tools[toolId].images = edits.tools[toolId].images || {};
+          edits.tools[toolId].images[idx] = { ...(edits.tools[toolId].images[idx] || {}), label: value };
+          const tool = (C.tools || []).find((x) => x.id === toolId);
+          if (tool && tool.images && tool.images[idx]) tool.images[idx].label = value;
+        }
+        // sync lightbox label attribute on parent
+        const fig = node.closest("[data-lightbox-label]");
+        if (fig) fig.setAttribute("data-lightbox-label", value);
         saveEdits(edits);
       });
     });

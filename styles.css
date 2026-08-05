@@ -708,3 +708,117 @@ body.has-lightbox .lightbox { pointer-events: auto; }
   }
   .atmosphere__orb { animation: none; }
 }
+
+/* —— Golden spiral staircase (from prior portfolio) —— */
+.home__spiral {
+  position: relative;
+  min-height: min(70vh, 640px);
+}
+.sx-spiral {
+  position: relative;
+  width: 100%;
+  height: min(70vh, 640px);
+  perspective: 1400px;
+  pointer-events: none;
+}
+body.is-editing .sx-spiral { pointer-events: auto; }
+.spiral-scene {
+  position: absolute; inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(12deg);
+}
+.spiral-axis {
+  position: absolute; left: 50%; top: 9%; bottom: 9%; width: 1px;
+  transform: translateX(-0.5px);
+  background: linear-gradient(180deg, transparent, rgba(168,137,85,.4) 18%, rgba(168,137,85,.4) 82%, transparent);
+}
+.spiral-base {
+  position: absolute; left: 50%; bottom: 4%; width: 62%; height: 10%;
+  transform: translateX(-50%); border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(168,137,85,.14), transparent 68%);
+  filter: blur(2px);
+}
+.spiral-step {
+  position: absolute; left: 50%; top: 50%;
+  transform-style: preserve-3d;
+  transform-origin: left center;
+  will-change: transform, opacity;
+}
+.spiral-tread {
+  position: relative;
+  width: clamp(110px, 12vw, 170px);
+  height: 4px; border-radius: 3px;
+  background: linear-gradient(90deg, rgba(255,254,249,.08), rgba(168,137,85,.92) 45%, rgba(255,254,249,.55));
+  box-shadow: 0 0 18px rgba(168,137,85,.28);
+}
+.spiral-tread::after {
+  content: "";
+  position: absolute; right: -3px; top: 50%;
+  width: 7px; height: 7px; border-radius: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,254,249,.95);
+  box-shadow: 0 0 12px rgba(168,137,85,.75);
+}
+.spiral-label {
+  position: absolute; bottom: 8px; margin-left: 12px;
+  display: grid; gap: 3px; white-space: nowrap;
+  transform-origin: left bottom;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+body.is-editing .spiral-label { pointer-events: auto; cursor: text; }
+.spiral-year {
+  font-family: var(--font-latin);
+  font-size: 0.7rem; letter-spacing: 0.22em; color: var(--gold);
+}
+.spiral-word {
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 1.5vw, 1.25rem);
+  letter-spacing: 0.04em; color: var(--ink);
+}
+.fx-shiny {
+  background-image: linear-gradient(120deg, rgba(22,19,15,.55) 0%, rgba(22,19,15,.55) 38%, #A88955 50%, rgba(22,19,15,.55) 62%, rgba(22,19,15,.55) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  animation: fx-shine 3.2s linear infinite;
+  animation-delay: calc(var(--fx-i, 0) * 0.35s);
+}
+@keyframes fx-shine {
+  0% { background-position: 150% center; }
+  100% { background-position: -50% center; }
+}
+.fx-blur { opacity: 0; filter: blur(10px); transform: translateY(-8px); transition: .7s var(--ease); }
+.fx-blur.is-in { opacity: 1; filter: blur(0); transform: none; }
+.fx-gradient {
+  background-image: linear-gradient(90deg, #A88955, #16130F, #C9B07A, #A88955);
+  background-size: 300% 100%;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: fx-flow 6s linear infinite;
+}
+@keyframes fx-flow {
+  0% { background-position: 0% center; }
+  100% { background-position: 300% center; }
+}
+
+/* Image caption edit affordance */
+.media__cap {
+  min-height: 1.4em;
+  border: 1px solid transparent;
+  transition: border-color .2s, background .2s;
+}
+body.is-editing .media__cap[data-edit-img] {
+  outline: 1px dashed rgba(168,137,85,.55);
+  outline-offset: 2px;
+  background: rgba(168,137,85,.06);
+  cursor: text;
+  pointer-events: auto;
+}
+body.is-editing .media[data-lightbox-src] { cursor: default; }
+body.is-editing .media[data-lightbox-src] img { pointer-events: none; }
+
+@media (max-width: 980px) {
+  .home__spiral { min-height: 360px; }
+  .sx-spiral { height: 360px; }
+}

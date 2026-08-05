@@ -66,13 +66,16 @@
     return esc(text).replace(/\n/g, "<br>");
   }
 
-  function mediaFigure(img) {
+  function mediaFigure(img, editKey) {
     const src = asset(img.src);
     const label = esc(img.label || "");
     if (!src) return "";
+    const capEdit = editKey
+      ? ` data-edit-img="${esc(editKey)}" data-edit-field="label"`
+      : "";
     return `<figure class="media" data-lightbox-src="${esc(src)}" data-lightbox-label="${label}" role="button" tabindex="0" title="点击放大">
       <img src="${esc(src)}" alt="${label}" loading="lazy" />
-      <figcaption>${label}</figcaption>
+      <figcaption class="media__cap"${capEdit}>${label || "图片名称"}</figcaption>
     </figure>`;
   }
 
@@ -129,11 +132,6 @@
   /* —— Renderers —— */
   function renderHome() {
     const tags = (C.tags || []).map((t) => `<span class="tag" data-edit-text="tag:${esc(t)}">${esc(t)}</span>`).join("");
-    const keywords = (C.heroKeywords || []).map((k, i) => `
-      <div class="timeline__item">
-        <div class="timeline__year" data-edit-keyword="${i}" data-edit-field="year">${esc(k.year)}</div>
-        <div class="timeline__text" data-edit-keyword="${i}" data-edit-field="text">${esc(k.text)}</div>
-      </div>`).join("");
 
     return `
       <div class="home">
@@ -157,9 +155,9 @@
           </div>
           <p class="muted" style="margin-top:1.2rem" data-edit-text="lead">${esc(site.lead || "")}</p>
         </div>
-        <aside>
+        <aside class="home__spiral">
           <p class="eyebrow">Trajectory</p>
-          <div class="timeline">${keywords}</div>
+          <div class="sx-spiral" data-spiral aria-label="职业轨迹螺旋阶梯"></div>
         </aside>
       </div>`;
   }
@@ -208,7 +206,7 @@
         <p class="muted" data-edit-mod="${esc(e.id)}.${esc(m.id)}" data-edit-field="bodyBrief">${esc(m.bodyBrief || "")}</p>
         ${metricsHtml(m.metrics, "结果指标")}
         <div class="module__body" data-edit-mod="${esc(e.id)}.${esc(m.id)}" data-edit-field="body">${nl(m.body || "")}</div>
-        <div class="media-grid">${(m.images || []).map(mediaFigure).join("")}</div>
+        <div class="media-grid">${(m.images || []).map((img, ii) => mediaFigure(img, `exp.${e.id}.${m.id}.${ii}`)).join("")}</div>
         ${toolBtn ? `<div class="btn-row" style="margin-top:.9rem">${toolBtn}</div>` : ""}
       </article>`;
     }).join("");
@@ -284,7 +282,7 @@
             ${href ? `<a class="btn btn--solid" href="${esc(href)}" target="_blank" rel="noopener">${esc(t.demoLabel || "打开星阵试用")}</a>` : ""}
           </div>
         </div>
-        <div class="media-grid">${(t.images || []).map(mediaFigure).join("")}</div>`;
+        <div class="media-grid">${(t.images || []).map((img, ii) => mediaFigure(img, `tool.${t.id}.${ii}`)).join("")}</div>`;
     }
 
     return `
@@ -299,7 +297,7 @@
           ${href ? `<a class="btn btn--solid" href="${esc(href)}" target="_blank" rel="noopener">${esc(t.demoLabel || "打开 Demo")}</a>` : `<span class="btn btn--ghost" style="cursor:default">内网演示</span>`}
         </div>
       </div>
-      <div class="media-grid">${(t.images || []).map(mediaFigure).join("")}</div>
+      <div class="media-grid">${(t.images || []).map((img, ii) => mediaFigure(img, `tool.${t.id}.${ii}`)).join("")}</div>
       <ul class="muted" style="margin-top:1rem;padding-left:1.1rem;list-style:disc">
         ${(t.capabilities || []).map((c) => `<li style="margin:.35rem 0">${esc(c)}</li>`).join("")}
       </ul>`;
@@ -353,7 +351,7 @@
         <h3 class="h3" data-edit-work="${esc(w.id)}" data-edit-field="title">${esc(w.title)}</h3>
         <p class="muted" data-edit-work="${esc(w.id)}" data-edit-field="summary">${esc(w.summary || "")}</p>
         <div class="module__body" data-edit-work="${esc(w.id)}" data-edit-field="detail">${nl(w.detail || "")}</div>
-        <div class="media-grid">${(w.images || []).map(mediaFigure).join("")}</div>
+        <div class="media-grid">${(w.images || []).map((img, ii) => mediaFigure(img, `work.${w.id}.${ii}`)).join("")}</div>
       </article>`).join("");
 
     return `
@@ -396,6 +394,9 @@
     $$("[data-edit-text='phone']").forEach((n) => { if (n.classList.contains("rail__contact")) n.textContent = site.phone || ""; });
     $$("[data-edit-text='status']").forEach((n) => { n.textContent = site.status || "开放全职机会"; });
     if (typeof window.__resumeBindEdit === "function") window.__resumeBindEdit();
+    if (window.__spiralHero && typeof window.__spiralHero.rebuild === "function") {
+      requestAnimationFrame(function () { window.__spiralHero.rebuild(); });
+    }
   }
 
   function setTrail(route) {
@@ -488,6 +489,7 @@
     document.addEventListener("click", (e) => {
       const light = e.target.closest("[data-lightbox-src]");
       if (light) {
+        if (document.body.classList.contains("is-editing") && e.target.closest("[data-edit-img]")) return;
         e.preventDefault();
         openLightbox(light.getAttribute("data-lightbox-src"), light.getAttribute("data-lightbox-label") || "");
         return;
