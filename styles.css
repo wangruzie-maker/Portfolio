@@ -641,6 +641,49 @@ body.is-editing [contenteditable="true"] {
   z-index: 50;
 }
 
+/* —— Lightbox —— */
+.lightbox {
+  position: fixed; inset: 0; z-index: 80;
+  display: grid; place-items: center;
+  padding: 1.2rem;
+}
+.lightbox[hidden] { display: none !important; }
+.lightbox__scrim {
+  position: absolute; inset: 0;
+  background: rgba(22, 19, 15, 0.55);
+  backdrop-filter: blur(6px);
+}
+.lightbox__panel {
+  position: relative; z-index: 1;
+  max-width: min(960px, 94vw);
+  max-height: 88vh;
+  margin: 0;
+  background: var(--ivory);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
+  padding: 0.65rem;
+}
+.lightbox__img {
+  max-width: 100%; max-height: calc(88vh - 3.2rem);
+  width: auto; height: auto; object-fit: contain;
+  margin: 0 auto;
+}
+.lightbox__cap {
+  padding: 0.45rem 0.25rem 0.15rem;
+  font-size: 0.78rem; color: var(--ink-3); text-align: center;
+}
+.lightbox__close {
+  position: absolute; top: 0.35rem; right: 0.45rem;
+  width: 32px; height: 32px;
+  background: rgba(255,254,249,.9);
+  border: 1px solid var(--line);
+  font-size: 1.1rem; line-height: 1;
+  z-index: 2;
+}
+body.has-lightbox .app { pointer-events: none; }
+body.has-lightbox .lightbox { pointer-events: auto; }
+.media { cursor: zoom-in; }
+
 /* —— Responsive —— */
 @media (max-width: 980px) {
   :root { --rail: 72px; }

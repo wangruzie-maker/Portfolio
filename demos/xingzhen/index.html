@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>星阵 · 柔光纪念碑</title>
+  <meta name="description" content="星阵 AIGC — 丝滑易懂的纪念碑美学工作台" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="atmosphere" aria-hidden="true">
+    <div class="atmosphere__wash"></div>
+    <div class="atmosphere__damask" id="damask"></div>
+    <div class="atmosphere__grain"></div>
+  </div>
+
+  <div class="app">
+    <aside class="rail" aria-label="功能导航">
+      <button class="brand" type="button" data-go="home" title="首页">
+        <span class="brand__mark" aria-hidden="true"></span>
+        <span class="brand__text">
+          <b>星阵</b>
+          <em>STAR MATRIX</em>
+        </span>
+      </button>
+
+      <p class="rail__label">功能</p>
+      <nav class="rail__nav">
+        <button type="button" class="rail__item is-active" data-go="home"><span class="ico" data-i="home"></span>首页</button>
+        <button type="button" class="rail__item" data-go="video"><span class="ico" data-i="video"></span>视频工坊</button>
+        <button type="button" class="rail__item" data-go="canvas"><span class="ico" data-i="canvas"></span>无限画布</button>
+        <button type="button" class="rail__item" data-go="voice"><span class="ico" data-i="voice"></span>语音生成</button>
+        <button type="button" class="rail__item" data-go="assets"><span class="ico" data-i="folder"></span>整体资产</button>
+        <button type="button" class="rail__item" data-go="studio"><span class="ico" data-i="studio"></span>单号创作 <i class="vip">VIP</i></button>
+        <button type="button" class="rail__item" data-go="agent"><span class="ico" data-i="spark"></span>批量生产 <i class="vip">VIP</i></button>
+        <button type="button" class="rail__item" data-go="delivery"><span class="ico" data-i="pack"></span>发布清单 <i class="vip">VIP</i></button>
+        <button type="button" class="rail__item" data-go="overview"><span class="ico" data-i="chart"></span>数据看板 <i class="vip">VIP</i></button>
+      </nav>
+
+      <div class="rail__tail">
+        <p class="rail__label">历史会话</p>
+        <div id="historyList" class="history"></div>
+        <button type="button" class="rail__item" data-go="settings"><span class="ico" data-i="user"></span>我的</button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="top">
+        <div class="top__left">
+          <span class="top__title" id="pageTitle">首页</span>
+          <div class="trail" id="trail" aria-label="流程位置"></div>
+        </div>
+        <div class="top__nav" aria-label="模块切换">
+          <button type="button" class="icon-btn" id="prevMod" aria-label="上一个模块">‹</button>
+          <button type="button" class="icon-btn" id="nextMod" aria-label="下一个模块">›</button>
+        </div>
+        <div class="top__right">
+          <button type="button" class="ghost-btn" id="searchBtn">搜索 ⌘K</button>
+          <button type="button" class="credits" id="creditsBtn">积分 1,280</button>
+          <button type="button" class="avatar" title="游客">游</button>
+        </div>
+      </header>
+
+      <div class="strip" id="corridor" tabindex="0">
+        <section class="pane" data-route="home" id="pane-home"></section>
+        <section class="pane" data-route="video" id="pane-video"></section>
+        <section class="pane" data-route="canvas" id="pane-canvas"></section>
+        <section class="pane" data-route="voice" id="pane-voice"></section>
+        <section class="pane" data-route="assets" id="pane-assets"></section>
+        <section class="pane" data-route="studio" id="pane-studio"></section>
+        <section class="pane" data-route="agent" id="pane-agent"></section>
+        <section class="pane" data-route="delivery" id="pane-delivery"></section>
+        <section class="pane" data-route="overview" id="pane-overview"></section>
+        <section class="pane" data-route="settings" id="pane-settings"></section>
+      </div>
+    </div>
+  </div>
+
+  <!-- 成体系浮层：可控生成 -->
+  <div class="sheet" id="genSheet" hidden>
+    <div class="sheet__scrim" data-close-sheet></div>
+    <div class="sheet__panel" role="dialog" aria-labelledby="genTitle">
+      <header class="sheet__head">
+        <h2 id="genTitle">生成中</h2>
+        <button type="button" class="icon-btn" data-close-sheet aria-label="关闭">×</button>
+      </header>
+      <ol class="gen-steps" id="genSteps"></ol>
+      <p class="gen-note" id="genNote">可在任意阶段暂停并修改</p>
+      <div class="sheet__actions">
+        <button type="button" class="btn btn--ghost" id="genPause">暂停</button>
+        <button type="button" class="btn btn--ghost" id="genFork">分叉一版</button>
+        <button type="button" class="btn btn--solid" id="genContinue">继续</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 成体系浮层：交付即预览 -->
+  <div class="sheet" id="packSheet" hidden>
+    <div class="sheet__scrim" data-close-sheet></div>
+    <div class="sheet__panel sheet__panel--wide" role="dialog" aria-labelledby="packTitle">
+      <header class="sheet__head">
+        <h2 id="packTitle">交付包预览</h2>
+        <button type="button" class="icon-btn" data-close-sheet aria-label="关闭">×</button>
+      </header>
+      <div class="pack" id="packBody"></div>
+      <div class="sheet__actions">
+        <button type="button" class="btn btn--ghost" data-close-sheet>返回修改</button>
+        <button type="button" class="btn btn--solid" id="packConfirm">确认并送入发布清单</button>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="demo-float" role="status">
+    <b>Demo</b>
+    <span>已于公网部署，当前为演示形态 · 数据与账号为占位</span>
+  </div>
+  <style>
+    .demo-float{
+      position:fixed; left:50%; bottom:1.1rem; transform:translateX(-50%);
+      z-index:60; display:flex; align-items:center; gap:.55rem;
+      max-width:min(560px,92vw); padding:.55rem .9rem;
+      border:1px solid rgba(26,55,49,.22);
+      background:rgba(255,254,249,.94);
+      box-shadow:0 12px 40px rgba(22,19,15,.12);
+      backdrop-filter:blur(10px);
+      font-family:Manrope,sans-serif; font-size:.78rem; color:#3C342B;
+      letter-spacing:.02em;
+    }
+    .demo-float b{
+      font-family:"Noto Serif SC",serif; letter-spacing:.14em;
+      color:#1A3731; font-size:.72rem;
+    }
+  </style>
+
+  <div class="toast" id="toast" hidden></div>
+  <script src="app.js"></script>
+</body>
+</html>

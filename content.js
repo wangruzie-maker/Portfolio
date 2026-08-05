@@ -578,7 +578,11 @@ window.assetUrl = function assetUrl(src) {
 window.demoUrl = function demoUrl(src) {
   if (!src) return "";
   if (/^https?:/i.test(src)) return src;
-  if (src.startsWith("./xingzhen") || src.startsWith("xingzhen")) return src.replace(/^\.\//, "./");
+  // 本仓库内 demo 始终走相对路径，避免指到错误域名
+  if (src.startsWith("./demos/") || src.startsWith("demos/") ||
+      src.startsWith("./xingzhen") || src.startsWith("xingzhen")) {
+    return src.replace(/^\.\//, "./");
+  }
   return window.assetUrl(src);
 };
 
@@ -615,8 +619,8 @@ if (window.DEFAULT_CONTENT) {
   window.DEFAULT_CONTENT.site.status = window.DEFAULT_CONTENT.site.status || "开放全职机会";
   const xz = (window.DEFAULT_CONTENT.tools || []).find(t => t.id === "xingzhen");
   if (xz) {
-    xz.demoUrl = "./xingzhen-hifi.html";
-    xz.demoLabel = "打开星阵高保真（含图文示意）";
-    xz.demoNote = "高保真含流程示意与界面截图解读；可交互原型便于面试讲解。线上生产环境为内网部署。";
+    xz.demoUrl = "./demos/xingzhen/index.html";
+    xz.demoLabel = "打开星阵试用";
+    xz.demoNote = "公网已部署产品能力；此页为可交互 Demo（占位数据）。";
   }
 }

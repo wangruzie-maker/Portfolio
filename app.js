@@ -70,10 +70,53 @@
     const src = asset(img.src);
     const label = esc(img.label || "");
     if (!src) return "";
-    return `<figure class="media">
+    return `<figure class="media" data-lightbox-src="${esc(src)}" data-lightbox-label="${label}" role="button" tabindex="0" title="点击放大">
       <img src="${esc(src)}" alt="${label}" loading="lazy" />
       <figcaption>${label}</figcaption>
     </figure>`;
+  }
+
+  function ensureLightbox() {
+    if ($("#lightbox")) return;
+    const el = document.createElement("div");
+    el.id = "lightbox";
+    el.className = "lightbox";
+    el.hidden = true;
+    el.innerHTML = `
+      <div class="lightbox__scrim" data-lightbox-close></div>
+      <figure class="lightbox__panel">
+        <button type="button" class="lightbox__close" data-lightbox-close aria-label="关闭">×</button>
+        <img class="lightbox__img" alt="" />
+        <figcaption class="lightbox__cap"></figcaption>
+      </figure>`;
+    document.body.appendChild(el);
+    el.addEventListener("click", (e) => {
+      if (e.target.closest("[data-lightbox-close]") || e.target === el.querySelector(".lightbox__scrim")) {
+        closeLightbox();
+      }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeLightbox();
+    });
+  }
+
+  function openLightbox(src, label) {
+    ensureLightbox();
+    const box = $("#lightbox");
+    const img = box.querySelector(".lightbox__img");
+    const cap = box.querySelector(".lightbox__cap");
+    img.src = src;
+    img.alt = label || "";
+    cap.textContent = label || "";
+    box.hidden = false;
+    document.body.classList.add("has-lightbox");
+  }
+
+  function closeLightbox() {
+    const box = $("#lightbox");
+    if (!box) return;
+    box.hidden = true;
+    document.body.classList.remove("has-lightbox");
   }
 
   function metricsHtml(list, tip) {
@@ -153,24 +196,33 @@
   function renderExp(id) {
     const e = (C.experiences || []).find((x) => x.id === id);
     if (!e) return `<p class="muted">未找到经历</p>`;
-    const modules = (e.modules || []).map((m) => `
+    const modules = (e.modules || []).map((m) => {
+      const toolBtn = m.toolAnchor === "xingzhen"
+        ? `<a class="btn btn--ghost" href="${esc(demo("./demos/xingzhen/index.html"))}" target="_blank" rel="noopener">打开星阵试用 →</a>`
+        : m.toolAnchor
+          ? `<button type="button" class="btn btn--ghost" data-go="tool-${esc(m.toolAnchor)}">相关工具 →</button>`
+          : "";
+      return `
       <article class="module">
-        <h3 class="h3">${esc(m.title)}</h3>
-        <p class="muted">${esc(m.bodyBrief || "")}</p>
+        <h3 class="h3" data-edit-mod="${esc(e.id)}.${esc(m.id)}" data-edit-field="title">${esc(m.title)}</h3>
+        <p class="muted" data-edit-mod="${esc(e.id)}.${esc(m.id)}" data-edit-field="bodyBrief">${esc(m.bodyBrief || "")}</p>
         ${metricsHtml(m.metrics, "结果指标")}
-        <div class="module__body">${nl(m.body || "")}</div>
+        <div class="module__body" data-edit-mod="${esc(e.id)}.${esc(m.id)}" data-edit-field="body">${nl(m.body || "")}</div>
         <div class="media-grid">${(m.images || []).map(mediaFigure).join("")}</div>
-        ${m.toolAnchor ? `<div class="btn-row" style="margin-top:.9rem">
-          <button type="button" class="btn btn--ghost" data-go="tool-${esc(m.toolAnchor)}">相关工具 →</button>
-        </div>` : ""}
-      </article>`).join("");
+        ${toolBtn ? `<div class="btn-row" style="margin-top:.9rem">${toolBtn}</div>` : ""}
+      </article>`;
+    }).join("");
 
     return `
       <button type="button" class="back" data-go="journey">← 返回 Journey</button>
       <div class="detail-hero">
-        <p class="eyebrow">${esc(e.period)} · ${esc(e.role)}</p>
-        <h2 class="h2">${esc(e.company)}</h2>
-        <p class="lead">${esc(e.detailIntro || e.oneLiner || "")}</p>
+        <p class="eyebrow">
+          <span data-edit-exp="${esc(e.id)}" data-edit-field="period">${esc(e.period)}</span>
+          ·
+          <span data-edit-exp="${esc(e.id)}" data-edit-field="role">${esc(e.role)}</span>
+        </p>
+        <h2 class="h2" data-edit-exp="${esc(e.id)}" data-edit-field="company">${esc(e.company)}</h2>
+        <p class="lead" data-edit-exp="${esc(e.id)}" data-edit-field="detailIntro">${esc(e.detailIntro || e.oneLiner || "")}</p>
         <div class="tags">${(e.tags || []).map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</div>
       </div>
       ${modules}`;
@@ -180,21 +232,28 @@
     const tools = (C.tools || []).map((t) => {
       const cover = t.images?.[0]?.src ? `style="background-image:url('${esc(asset(t.images[0].src))}')"` : "";
       const href = demo(t.demoUrl || "");
+      const isXing = t.id === "xingzhen";
+      const actions = isXing
+        ? (href
+          ? `<a class="btn btn--solid" href="${esc(href)}" target="_blank" rel="noopener">${esc(t.demoLabel || "打开试用")}</a>`
+          : "")
+        : `
+              ${href ? "" : ""}
+              <button type="button" class="btn btn--ghost" data-go="tool-${esc(t.id)}">图文说明</button>
+              ${href ? `<a class="btn btn--solid" href="${esc(href)}" target="_blank" rel="noopener">${esc(t.demoLabel || "打开 Demo")}</a>` : ""}`;
       return `
         <article class="feature">
-          <div class="feature__cover" ${cover}></div>
+          <div class="feature__cover" ${cover} role="${isXing && href ? "link" : ""}" ${isXing && href ? `data-open="${esc(href)}"` : ""}></div>
           <div class="feature__body">
             <p class="eyebrow">${esc(t.sourceLabel || "Tool")}</p>
-            <h3 class="h3">${esc(t.name)}</h3>
-            <p class="muted">${esc((t.oneLiner || "").replace(/\n/g, " "))}</p>
+            <h3 class="h3" data-edit-tool="${esc(t.id)}" data-edit-field="name">${esc(t.name)}</h3>
+            <p class="muted" data-edit-tool="${esc(t.id)}" data-edit-field="oneLiner">${esc((t.oneLiner || "").replace(/\n/g, " "))}</p>
             ${metricsHtml(t.metrics)}
+            ${isXing ? `<p class="muted" style="margin:.45rem 0">${esc(t.demoNote || "")}</p>` : `
             <ul class="muted" style="margin:.5rem 0;padding-left:1rem;list-style:disc">
               ${(t.capabilities || []).slice(0, 3).map((c) => `<li>${esc(c)}</li>`).join("")}
-            </ul>
-            <div class="btn-row">
-              <button type="button" class="btn btn--ghost" data-go="tool-${esc(t.id)}">图文说明</button>
-              ${href ? `<a class="btn btn--solid" href="${esc(href)}" target="_blank" rel="noopener">${esc(t.demoLabel || "打开 Demo")}</a>` : ""}
-            </div>
+            </ul>`}
+            <div class="btn-row">${actions}</div>
           </div>
         </article>`;
     }).join("");
@@ -212,55 +271,38 @@
     const t = (C.tools || []).find((x) => x.id === id);
     if (!t) return `<p class="muted">未找到工具</p>`;
     const href = demo(t.demoUrl || "");
-    const isXing = id === "xingzhen";
 
-    const flow = isXing ? `
-      <p class="eyebrow">流程示意</p>
-      <div class="flow">
-        <div class="flow__step"><b>01</b><span>意图输入</span></div>
-        <div class="flow__step"><b>02</b><span>路径选择</span></div>
-        <div class="flow__step"><b>03</b><span>可控生成</span></div>
-        <div class="flow__step"><b>04</b><span>交付收束</span></div>
-      </div>
-      <div class="annotate">
-        <div class="annotate__note">
-          <strong>为什么做星阵</strong>
-          矩阵号从 0 到 1：物料高频、链路分散、选题靠个人经验。星阵把 SOP 固化成中台——批量生产到数据回流，把「个人产能」升级为「可复用能力」。
+    // 星阵：不再堆长介绍，直接给试用入口
+    if (id === "xingzhen") {
+      return `
+        <button type="button" class="back" data-go="lab">← 返回 Lab</button>
+        <div class="detail-hero">
+          <p class="eyebrow">${esc(t.sourceLabel || "")}</p>
+          <h2 class="h2" data-edit-tool="xingzhen" data-edit-field="name">${esc(t.name)}</h2>
+          <p class="lead" data-edit-tool="xingzhen" data-edit-field="demoNote">${esc(t.demoNote || "")}</p>
+          <div class="btn-row">
+            ${href ? `<a class="btn btn--solid" href="${esc(href)}" target="_blank" rel="noopener">${esc(t.demoLabel || "打开星阵试用")}</a>` : ""}
+          </div>
         </div>
-        ${t.images?.[0] ? mediaFigure(t.images[0]) : ""}
-      </div>
-      <div class="annotate">
-        ${t.images?.[1] ? mediaFigure(t.images[1]) : ""}
-        <div class="annotate__note">
-          <strong>批量生产</strong>
-          图组 / 视频物料可批量产出；单人日产可达 100+，综合成本下降 70%+。面试可用高保真讲解完整交互。
-        </div>
-      </div>
-      <div class="annotate">
-        <div class="annotate__note">
-          <strong>数据闭环</strong>
-          生产—分发—分析回流，支撑复盘与下一轮选题。右侧为平台界面截图（与百度经历同源）。
-        </div>
-        ${t.images?.[2] ? mediaFigure(t.images[2]) : ""}
-      </div>` : "";
+        <div class="media-grid">${(t.images || []).map(mediaFigure).join("")}</div>`;
+    }
 
     return `
       <button type="button" class="back" data-go="lab">← 返回 Lab</button>
       <div class="detail-hero">
         <p class="eyebrow">${esc(t.sourceLabel || "")}</p>
-        <h2 class="h2">${esc(t.name)}</h2>
-        <p class="lead">${esc((t.oneLiner || "").replace(/\n/g, " "))}</p>
+        <h2 class="h2" data-edit-tool="${esc(t.id)}" data-edit-field="name">${esc(t.name)}</h2>
+        <p class="lead" data-edit-tool="${esc(t.id)}" data-edit-field="oneLiner">${esc((t.oneLiner || "").replace(/\n/g, " "))}</p>
         ${metricsHtml(t.metrics)}
-        <p class="muted">${esc(t.demoNote || "")}</p>
+        <p class="muted" data-edit-tool="${esc(t.id)}" data-edit-field="demoNote">${esc(t.demoNote || "")}</p>
         <div class="btn-row" style="margin-top:.8rem">
           ${href ? `<a class="btn btn--solid" href="${esc(href)}" target="_blank" rel="noopener">${esc(t.demoLabel || "打开 Demo")}</a>` : `<span class="btn btn--ghost" style="cursor:default">内网演示</span>`}
         </div>
       </div>
-      ${flow}
-      ${!isXing ? `<div class="media-grid">${(t.images || []).map(mediaFigure).join("")}</div>
-        <ul class="muted" style="margin-top:1rem;padding-left:1.1rem;list-style:disc">
-          ${(t.capabilities || []).map((c) => `<li style="margin:.35rem 0">${esc(c)}</li>`).join("")}
-        </ul>` : `<div class="media-grid">${(t.images || []).slice(3).map(mediaFigure).join("")}</div>`}`;
+      <div class="media-grid">${(t.images || []).map(mediaFigure).join("")}</div>
+      <ul class="muted" style="margin-top:1rem;padding-left:1.1rem;list-style:disc">
+        ${(t.capabilities || []).map((c) => `<li style="margin:.35rem 0">${esc(c)}</li>`).join("")}
+      </ul>`;
   }
 
   function renderWork() {
@@ -444,12 +486,32 @@
 
   function bind() {
     document.addEventListener("click", (e) => {
+      const light = e.target.closest("[data-lightbox-src]");
+      if (light) {
+        e.preventDefault();
+        openLightbox(light.getAttribute("data-lightbox-src"), light.getAttribute("data-lightbox-label") || "");
+        return;
+      }
+      const openEl = e.target.closest("[data-open]");
+      if (openEl) {
+        const url = openEl.getAttribute("data-open");
+        if (url) window.open(url, "_blank", "noopener");
+        return;
+      }
       const goEl = e.target.closest("[data-go]");
       if (goEl) {
         e.preventDefault();
         go(goEl.getAttribute("data-go"));
         return;
       }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const light = e.target.closest?.("[data-lightbox-src]");
+      if (!light) return;
+      e.preventDefault();
+      openLightbox(light.getAttribute("data-lightbox-src"), light.getAttribute("data-lightbox-label") || "");
     });
 
     $("#prevMod")?.addEventListener("click", () => neighbor(-1));

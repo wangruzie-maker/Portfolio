@@ -95,6 +95,43 @@
     if (edits.works && C.works) {
       C.works = C.works.map((w) => ({ ...w, ...(edits.works[w.id] || {}) }));
     }
+    if (edits.experiences && C.experiences) {
+      C.experiences = C.experiences.map((exp) => {
+        const patch = edits.experiences[exp.id];
+        if (!patch) return exp;
+        const { modules: modPatch, ...rest } = patch;
+        return {
+          ...exp,
+          ...rest,
+          modules: (exp.modules || []).map((m) => ({
+            ...m,
+            ...((modPatch && modPatch[m.id]) || {}),
+          })),
+        };
+      });
+    }
+    if (edits.tools && C.tools) {
+      C.tools = C.tools.map((t) => ({ ...t, ...(edits.tools[t.id] || {}) }));
+    }
+  }
+
+  function exportSyncPack() {
+    const edits = loadEdits();
+    applyEditsToContent();
+    const payload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      note: "把此文件发给开发者合并进 content.js，或自行替换仓库后推送，访客才能看到。仅本机编辑不会同步到 Netlify/GitHub Pages。",
+      edits,
+      content: window.DEFAULT_CONTENT,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `portfolio-edits-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    window.alert("已下载同步包。注意：页面上改的字默认只存在你这台设备；要让别人看到，需把同步包合并进仓库并重新部署。");
   }
 
   function wantEditMode() {
@@ -113,10 +150,11 @@
     root.hidden = !isAuthed();
     root.innerHTML = `
       <div class="edit-panel" data-edit-panel hidden>
-        <p class="edit-hint">编辑：改文字 · 自动保存在本机。链接与飞书 URL 上传仓库后生效。清空可恢复默认文案。</p>
+        <p class="edit-hint">可改首页 / Journey 详情 / Lab / 作品等文案，保存在本机。<b>别人打开网站看不到你的本机修改</b>——需点「导出同步包」后提交仓库重新部署。</p>
         <div class="edit-module-list" data-module-toggles></div>
       </div>
       <button type="button" class="edit-fab" data-edit-toggle aria-pressed="false">编辑内容</button>
+      <button type="button" class="edit-fab" data-edit-export hidden style="background:var(--gold);border-color:var(--gold);color:var(--ivory)">导出同步包</button>
       <button type="button" class="edit-fab" data-edit-reset hidden style="background:transparent;color:var(--jade)">清空本地修改</button>
       <button type="button" class="edit-fab" data-edit-lock hidden style="background:transparent;color:var(--ink-3)">锁定编辑</button>
     `;
@@ -133,6 +171,10 @@
     root.querySelector("[data-edit-toggle]").addEventListener("click", () => {
       if (!requireAuth()) return;
       setEditMode(!document.body.classList.contains("is-editing"));
+    });
+    root.querySelector("[data-edit-export]").addEventListener("click", () => {
+      if (!requireAuth()) return;
+      exportSyncPack();
     });
     root.querySelector("[data-edit-reset]").addEventListener("click", () => {
       if (!requireAuth()) return;
@@ -189,6 +231,7 @@
     const panel = document.querySelector("[data-edit-panel]");
     const reset = document.querySelector("[data-edit-reset]");
     const lock = document.querySelector("[data-edit-lock]");
+    const expBtn = document.querySelector("[data-edit-export]");
     const topBtn = document.querySelector("#editBtn");
     if (toggle) {
       toggle.setAttribute("aria-pressed", String(on));
@@ -203,6 +246,7 @@
     if (panel) panel.hidden = !on;
     if (reset) reset.hidden = !on;
     if (lock) lock.hidden = !isAuthed();
+    if (expBtn) expBtn.hidden = !isAuthed();
     bindEditing(on);
   }
 
@@ -316,6 +360,65 @@
       });
       node.addEventListener("click", (event) => {
         if (document.body.classList.contains("is-editing")) event.preventDefault();
+      });
+    });
+
+    document.querySelectorAll("[data-edit-exp]").forEach((node) => {
+      node.contentEditable = on ? "true" : "false";
+      if (!on || node.dataset.editBound === "1") return;
+      node.dataset.editBound = "1";
+      node.addEventListener("blur", () => {
+        const id = node.getAttribute("data-edit-exp");
+        const field = node.getAttribute("data-edit-field") || "company";
+        const value = node.innerText.trim();
+        const edits = loadEdits();
+        edits.experiences = edits.experiences || {};
+        edits.experiences[id] = { ...(edits.experiences[id] || {}), [field]: value };
+        const exp = (window.DEFAULT_CONTENT.experiences || []).find((e) => e.id === id);
+        if (exp) exp[field] = value;
+        saveEdits(edits);
+      });
+    });
+
+    document.querySelectorAll("[data-edit-mod]").forEach((node) => {
+      node.contentEditable = on ? "true" : "false";
+      if (!on || node.dataset.editBound === "1") return;
+      node.dataset.editBound = "1";
+      node.addEventListener("blur", () => {
+        const key = node.getAttribute("data-edit-mod") || "";
+        const [expId, modId] = key.split(".");
+        const field = node.getAttribute("data-edit-field") || "title";
+        const value = node.innerText.trim();
+        if (!expId || !modId) return;
+        const edits = loadEdits();
+        edits.experiences = edits.experiences || {};
+        edits.experiences[expId] = edits.experiences[expId] || {};
+        edits.experiences[expId].modules = edits.experiences[expId].modules || {};
+        edits.experiences[expId].modules[modId] = {
+          ...(edits.experiences[expId].modules[modId] || {}),
+          [field]: value,
+        };
+        const exp = (window.DEFAULT_CONTENT.experiences || []).find((e) => e.id === expId);
+        const mod = exp && (exp.modules || []).find((m) => m.id === modId);
+        if (mod) mod[field] = value;
+        saveEdits(edits);
+      });
+    });
+
+    document.querySelectorAll("[data-edit-tool]").forEach((node) => {
+      node.contentEditable = on ? "true" : "false";
+      if (!on || node.dataset.editBound === "1") return;
+      node.dataset.editBound = "1";
+      node.addEventListener("blur", () => {
+        const id = node.getAttribute("data-edit-tool");
+        const field = node.getAttribute("data-edit-field") || "name";
+        const value = node.innerText.trim();
+        const edits = loadEdits();
+        edits.tools = edits.tools || {};
+        edits.tools[id] = { ...(edits.tools[id] || {}), [field]: value };
+        const tool = (window.DEFAULT_CONTENT.tools || []).find((t) => t.id === id);
+        if (tool) tool[field] = value;
+        saveEdits(edits);
       });
     });
   }
