@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>星阵 · 高保真图文示意</title>
+  <meta name="description" content="星阵 AIGC 中台 — 流程示意与可交互高保真" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600&family=Noto+Serif+SC:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body { overflow: auto; }
+    .xz-page { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 2rem 1.4rem 4rem; }
+    .xz-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap; }
+    .xz-hero { margin-bottom: 2rem; }
+    .xz-hero h1 { font-family: var(--font-display); font-size: clamp(2rem, 5vw, 3.2rem); letter-spacing: .14em; margin: .4rem 0 1rem; }
+    .xz-panel {
+      border: 1px solid var(--line);
+      background: rgba(255,254,249,.78);
+      padding: 1.2rem 1.3rem;
+      margin-bottom: 1.1rem;
+    }
+    .xz-mock {
+      border: 1px solid var(--line);
+      background: linear-gradient(160deg, #FFFEF9, #F0E8DA);
+      padding: 1rem;
+      min-height: 220px;
+      position: relative;
+      overflow: hidden;
+    }
+    .xz-mock__bar {
+      display: flex; gap: .5rem; margin-bottom: .9rem;
+    }
+    .xz-mock__bar i {
+      height: 8px; border-radius: 2px; background: rgba(26,55,49,.15);
+    }
+    .xz-mock__bar i:nth-child(1) { width: 40%; }
+    .xz-mock__bar i:nth-child(2) { width: 22%; }
+    .xz-mock__bar i:nth-child(3) { width: 18%; }
+    .xz-mock__stage {
+      border: 1px dashed rgba(168,137,85,.4);
+      padding: 1.2rem;
+      text-align: center;
+      font-family: var(--font-display);
+      letter-spacing: .12em;
+      color: var(--jade);
+      background: rgba(255,254,249,.7);
+    }
+    .xz-mock__hint {
+      position: absolute; right: .8rem; bottom: .8rem;
+      font-size: .68rem; letter-spacing: .1em; color: var(--gold);
+      background: rgba(255,254,249,.9); padding: .3rem .5rem;
+      border: 1px solid rgba(168,137,85,.3);
+    }
+    .xz-tabs { display: flex; gap: .4rem; flex-wrap: wrap; margin: 1rem 0; }
+    .xz-tab {
+      padding: .45rem .8rem; border: 1px solid var(--line);
+      font-size: .76rem; letter-spacing: .06em; color: var(--ink-2);
+    }
+    .xz-tab.is-on { border-color: var(--jade); color: var(--jade); background: rgba(26,55,49,.06); }
+    .xz-live {
+      display: none; margin-top: 1rem;
+      border: 1px solid var(--line);
+      background: var(--ivory);
+      min-height: 420px;
+    }
+    .xz-live.is-on { display: block; }
+    .xz-live iframe { width: 100%; height: min(70vh, 640px); border: 0; }
+    .xz-callout {
+      border-left: 2px solid var(--jade);
+      padding: .8rem 1rem;
+      background: rgba(26,55,49,.04);
+      font-size: .88rem; line-height: 1.65; color: var(--ink-2);
+      margin: 1rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="atmosphere" aria-hidden="true">
+    <div class="atmosphere__wash"></div>
+    <div class="atmosphere__damask"></div>
+    <div class="atmosphere__grain"></div>
+  </div>
+
+  <main class="xz-page">
+    <nav class="xz-nav">
+      <a class="back" href="./index.html#/lab">← 返回 Portfolio · Lab</a>
+      <div class="btn-row">
+        <button type="button" class="btn btn--ghost" id="scrollDemo">看图文示意</button>
+        <button type="button" class="btn btn--solid" id="openLive">打开可交互原型</button>
+      </div>
+    </nav>
+
+    <header class="xz-hero">
+      <p class="eyebrow">Baidu ACG · 星阵</p>
+      <h1>星阵高保真 · 图文示意</h1>
+      <p class="lead">
+        矩阵号物料从生产到数据闭环的 AIGC 中台。下面用「流程 + 截图解读 + 可交互原型」说明产品在解决什么、怎么用——避免只看界面却看不懂。
+      </p>
+      <div class="metrics">
+        <span class="metric" data-tip="单人日产图组/视频物料">日产 100+</span>
+        <span class="metric" data-tip="相对人工链路综合成本">成本下降 70%+</span>
+      </div>
+    </header>
+
+    <section class="xz-panel" id="flow">
+      <p class="eyebrow">01 · 一眼看懂流程</p>
+      <h2 class="h2" style="font-size:1.4rem">意图 → 路径 → 生成 → 交付</h2>
+      <div class="flow" style="margin-top:1rem">
+        <div class="flow__step"><b>意图</b><span>说清要产什么</span></div>
+        <div class="flow__step"><b>路径</b><span>快速 / 单号 / 批量</span></div>
+        <div class="flow__step"><b>生成</b><span>可暂停、可分叉</span></div>
+        <div class="flow__step"><b>交付</b><span>预览包进清单</span></div>
+      </div>
+      <div class="xz-callout">
+        设计原则：每屏一个主任务；横向「模块游廊」切换能力；生成过程可见可控；产出以交付包收束——方便面试时顺着链路讲清。
+      </div>
+    </section>
+
+    <section class="xz-panel" id="shots">
+      <p class="eyebrow">02 · 界面截图解读</p>
+      <h2 class="h2" style="font-size:1.4rem">真实平台画面（GitHub 资产）</h2>
+      <div class="annotate">
+        <div class="annotate__note">
+          <strong>工作台</strong>
+          日常入口：选账号/意图后进入创作。对应市场部「要物料」的高频动作，而不是散落在多个工具里。
+        </div>
+        <figure class="media">
+          <img id="img0" alt="星阵工作台" loading="lazy" />
+          <figcaption>星阵 · 工作台</figcaption>
+        </figure>
+      </div>
+      <div class="annotate">
+        <figure class="media">
+          <img id="img1" alt="批量生产" loading="lazy" />
+          <figcaption>星阵 · 批量生产</figcaption>
+        </figure>
+        <div class="annotate__note">
+          <strong>批量生产</strong>
+          图组与视频批次产出，支撑矩阵号节奏。讲解时可对照「日产 100+ / 成本下降 70%+」。
+        </div>
+      </div>
+      <div class="annotate">
+        <div class="annotate__note">
+          <strong>数据闭环</strong>
+          生产结果回流，便于复盘与下一轮选题——把内容供给做成中台能力。
+        </div>
+        <figure class="media">
+          <img id="img2" alt="数据闭环" loading="lazy" />
+          <figcaption>星阵 · 数据闭环</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="xz-panel" id="prototype">
+      <p class="eyebrow">03 · 可交互原型</p>
+      <h2 class="h2" style="font-size:1.4rem">柔光纪念碑皮肤 · 讲解用</h2>
+      <p class="muted">下列为示意工作台骨架（非内网生产环境）。点「打开可交互原型」可展开；用左右切换感受模块游廊。</p>
+
+      <div class="xz-tabs" role="tablist">
+        <button type="button" class="xz-tab is-on" data-mock="home">首页 · 意图</button>
+        <button type="button" class="xz-tab" data-mock="path">路径选择</button>
+        <button type="button" class="xz-tab" data-mock="gen">可控生成</button>
+        <button type="button" class="xz-tab" data-mock="pack">交付预览</button>
+      </div>
+
+      <div class="xz-mock" id="mock">
+        <div class="xz-mock__bar"><i></i><i></i><i></i></div>
+        <div class="xz-mock__stage" id="mockStage">写下意图：例如「秒哒 · 三图种草」</div>
+        <span class="xz-mock__hint" id="mockHint">STEP 01 · 一眼一意</span>
+      </div>
+
+      <div class="xz-live" id="live">
+        <iframe title="星阵交互原型" src="xingzhen-live.html" loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <section class="xz-panel">
+      <p class="eyebrow">04 · 边界说明</p>
+      <p class="muted">生产环境部署在内网，线上面试请用本页图文 + 原型讲解；完整数据与账号权限以部门现场投屏为准。</p>
+      <div class="btn-row" style="margin-top:1rem">
+        <a class="btn btn--ghost" href="./index.html#/baidu">回到百度经历详情</a>
+        <a class="btn btn--solid" href="./index.html#/lab">返回 Lab</a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const BASE = "https://wangruzie-maker.github.io/Portfolio/";
+    const shots = [
+      "assets/covers/detail/baidu-b1-0.png",
+      "assets/covers/detail/baidu-b1-1.png",
+      "assets/covers/detail/baidu-b1-2.png",
+    ];
+    shots.forEach((src, i) => {
+      const el = document.getElementById("img" + i);
+      if (el) el.src = BASE + src;
+    });
+
+    const copy = {
+      home: ["写下意图：例如「秒哒 · 三图种草」", "STEP 01 · 一眼一意"],
+      path: ["选择路径：快速成片 / 单号精修 / 批量矩阵", "STEP 02 · 路径分流"],
+      gen: ["生成中：可暂停 · 可分叉一版 · 质量检查", "STEP 03 · 生成可控"],
+      pack: ["交付包预览 → 确认送入发布清单", "STEP 04 · 交付收束"],
+    };
+    document.querySelectorAll("[data-mock]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("[data-mock]").forEach((b) => b.classList.remove("is-on"));
+        btn.classList.add("is-on");
+        const key = btn.getAttribute("data-mock");
+        document.getElementById("mockStage").textContent = copy[key][0];
+        document.getElementById("mockHint").textContent = copy[key][1];
+      });
+    });
+
+    document.getElementById("scrollDemo").addEventListener("click", () => {
+      document.getElementById("shots").scrollIntoView({ behavior: "smooth" });
+    });
+    document.getElementById("openLive").addEventListener("click", () => {
+      const live = document.getElementById("live");
+      live.classList.add("is-on");
+      live.scrollIntoView({ behavior: "smooth" });
+    });
+  </script>
+</body>
+</html>

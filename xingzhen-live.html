@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>星阵 · 交互原型</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Manrope:wght@400;500;600&family=Noto+Serif+SC:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body { overflow: hidden; }
+    .live-app { position: relative; z-index: 1; height: 100vh; display: flex; flex-direction: column; }
+    .live-top {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .7rem 1rem; border-bottom: 1px solid var(--line);
+      background: rgba(255,254,249,.8);
+    }
+    .live-top b { font-family: var(--font-display); letter-spacing: .16em; }
+    .live-strip {
+      flex: 1; display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+    }
+    .live-pane {
+      flex: 0 0 100%; scroll-snap-align: start;
+      padding: 1.4rem 1.5rem; overflow-y: auto;
+    }
+    .live-input {
+      width: 100%; max-width: 420px;
+      border: 1px solid var(--line);
+      background: rgba(255,254,249,.85);
+      padding: .85rem 1rem; margin: .8rem 0 1rem;
+      font-size: .92rem;
+    }
+    .live-input:focus { outline: 1px solid var(--jade); }
+    .path-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; max-width: 560px; }
+    .path-card {
+      border: 1px solid var(--line); padding: .9rem; text-align: left;
+      background: rgba(255,254,249,.7);
+      transition: border-color .25s, transform .3s var(--ease);
+    }
+    .path-card:hover, .path-card.is-on {
+      border-color: var(--jade); transform: translateY(-2px);
+    }
+    .path-card b { display: block; font-family: var(--font-display); margin-bottom: .3rem; }
+    .gen-list { max-width: 420px; }
+    .gen-list li {
+      display: flex; justify-content: space-between;
+      padding: .65rem 0; border-bottom: 1px solid var(--line);
+      font-size: .88rem; color: var(--ink-2);
+    }
+    .gen-list li.is-on { color: var(--jade); }
+    .gen-list li.is-done { color: var(--ink-3); }
+    .pack-box {
+      max-width: 480px; border: 1px solid var(--line);
+      padding: 1rem; background: rgba(246,240,230,.5);
+    }
+    @media (max-width: 700px) { .path-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="atmosphere" aria-hidden="true">
+    <div class="atmosphere__wash"></div>
+    <div class="atmosphere__damask"></div>
+    <div class="atmosphere__grain"></div>
+  </div>
+
+  <div class="live-app">
+    <header class="live-top">
+      <b>星阵 · 讲解原型</b>
+      <div class="top__nav">
+        <button type="button" class="icon-btn" id="prev" aria-label="上一步">‹</button>
+        <button type="button" class="icon-btn" id="next" aria-label="下一步">›</button>
+      </div>
+    </header>
+    <div class="live-strip" id="strip">
+      <section class="live-pane" data-i="0">
+        <p class="eyebrow">Step 01</p>
+        <h2 class="h2" style="font-size:1.6rem">写下意图</h2>
+        <p class="muted">一屏只做一件事：说清要产什么。</p>
+        <input class="live-input" id="intent" placeholder="例如：秒哒 · 三图种草 · 年轻职场向" />
+        <button type="button" class="btn btn--solid" id="toPath">下一步：选路径</button>
+      </section>
+      <section class="live-pane" data-i="1">
+        <p class="eyebrow">Step 02</p>
+        <h2 class="h2" style="font-size:1.6rem">选择路径</h2>
+        <p class="muted" id="intentEcho"></p>
+        <div class="path-grid" id="paths">
+          <button type="button" class="path-card" data-path="fast"><b>快速</b><span class="muted">少步骤出草稿</span></button>
+          <button type="button" class="path-card" data-path="studio"><b>单号</b><span class="muted">精修单账号</span></button>
+          <button type="button" class="path-card" data-path="batch"><b>批量</b><span class="muted">矩阵批次</span></button>
+        </div>
+        <div class="btn-row" style="margin-top:1rem">
+          <button type="button" class="btn btn--ghost" data-jump="0">返回</button>
+          <button type="button" class="btn btn--solid" id="toGen">开始生成</button>
+        </div>
+      </section>
+      <section class="live-pane" data-i="2">
+        <p class="eyebrow">Step 03</p>
+        <h2 class="h2" style="font-size:1.6rem">可控生成</h2>
+        <p class="muted">可暂停、可分叉——生成不是黑盒。</p>
+        <ol class="gen-list" id="phases">
+          <li data-p="0"><span>理解意图</span><em>—</em></li>
+          <li data-p="1"><span>匹配资产</span><em>—</em></li>
+          <li data-p="2"><span>生成草稿</span><em>—</em></li>
+          <li data-p="3"><span>质量检查</span><em>—</em></li>
+          <li data-p="4"><span>组装交付包</span><em>—</em></li>
+        </ol>
+        <div class="btn-row">
+          <button type="button" class="btn btn--ghost" id="pause">暂停</button>
+          <button type="button" class="btn btn--ghost" id="fork">分叉一版</button>
+          <button type="button" class="btn btn--solid" id="toPack">预览交付包</button>
+        </div>
+      </section>
+      <section class="live-pane" data-i="3">
+        <p class="eyebrow">Step 04</p>
+        <h2 class="h2" style="font-size:1.6rem">交付收束</h2>
+        <div class="pack-box">
+          <p class="eyebrow">Delivery pack</p>
+          <h3 class="h3" id="packTitle">—</h3>
+          <p class="muted" id="packMeta">—</p>
+          <div class="metrics" style="margin-top:.7rem">
+            <span class="metric">图组 ×3</span>
+            <span class="metric">文案就绪</span>
+            <span class="metric">待发布</span>
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:1rem">
+          <button type="button" class="btn btn--ghost" data-jump="2">返回修改</button>
+          <button type="button" class="btn btn--solid" id="done">确认并送入清单</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+  <script>
+    const strip = document.getElementById("strip");
+    const panes = [...document.querySelectorAll(".live-pane")];
+    let i = 0, path = "batch", phase = 0, timer = null, paused = false;
+
+    function toast(m) {
+      const el = document.getElementById("toast");
+      el.hidden = false; el.textContent = m;
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => { el.hidden = true; }, 1800);
+    }
+    function go(n) {
+      i = Math.max(0, Math.min(panes.length - 1, n));
+      panes[i].scrollIntoView({ behavior: "smooth", inline: "start" });
+      if (i === 2) startGen();
+      if (i === 1) {
+        document.getElementById("intentEcho").textContent =
+          "意图：" + (document.getElementById("intent").value || "（未填写，可用示例）");
+      }
+      if (i === 3) {
+        const intent = document.getElementById("intent").value || "秒哒 · 三图种草";
+        document.getElementById("packTitle").textContent = intent;
+        document.getElementById("packMeta").textContent = "路径：" + ({ fast: "快速", studio: "单号", batch: "批量" }[path] || path);
+      }
+    }
+    function startGen() {
+      clearInterval(timer);
+      phase = 0; paused = false;
+      const lis = [...document.querySelectorAll("#phases li")];
+      lis.forEach((li) => { li.className = ""; li.querySelector("em").textContent = "—"; });
+      timer = setInterval(() => {
+        if (paused) return;
+        lis.forEach((li, idx) => {
+          li.classList.toggle("is-done", idx < phase);
+          li.classList.toggle("is-on", idx === phase);
+          li.querySelector("em").textContent = idx < phase ? "完成" : idx === phase ? "进行中" : "—";
+        });
+        phase += 1;
+        if (phase > lis.length) clearInterval(timer);
+      }, 700);
+    }
+
+    document.getElementById("prev").onclick = () => go(i - 1);
+    document.getElementById("next").onclick = () => go(i + 1);
+    document.getElementById("toPath").onclick = () => go(1);
+    document.getElementById("toGen").onclick = () => go(2);
+    document.getElementById("toPack").onclick = () => go(3);
+    document.getElementById("pause").onclick = () => { paused = !paused; toast(paused ? "已暂停" : "继续生成"); };
+    document.getElementById("fork").onclick = () => toast("已分叉一版草稿");
+    document.getElementById("done").onclick = () => toast("已送入发布清单（示意）");
+    document.querySelectorAll("[data-jump]").forEach((b) => b.onclick = () => go(+b.dataset.jump));
+    document.querySelectorAll("[data-path]").forEach((b) => {
+      b.onclick = () => {
+        document.querySelectorAll("[data-path]").forEach((x) => x.classList.remove("is-on"));
+        b.classList.add("is-on");
+        path = b.dataset.path;
+      };
+    });
+    document.querySelector('[data-path="batch"]').classList.add("is-on");
+  </script>
+</body>
+</html>

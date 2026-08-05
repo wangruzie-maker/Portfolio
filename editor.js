@@ -1,0 +1,258 @@
+/**
+ * Resume editor — 承接 Portfolio GitHub 版能力：
+ * 文案 contentEditable · 本机 localStorage · ?edit=1 · 模块显隐
+ */
+(function () {
+  "use strict";
+
+  const STORAGE_KEY = "ivory-portfolio-edits-v1";
+  const TOGGLEABLE = [
+    { id: "journey", label: "Journey 经历" },
+    { id: "lab", label: "Lab 工具" },
+    { id: "work", label: "Work 作品" },
+  ];
+
+  function loadEdits() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") || {};
+    } catch {
+      return {};
+    }
+  }
+
+  function saveEdits(edits) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(edits));
+    window.__resumeEdits = edits;
+  }
+
+  function pathSet(obj, path, value) {
+    const parts = path.split(".");
+    let cursor = obj;
+    for (let i = 0; i < parts.length - 1; i += 1) {
+      const key = parts[i];
+      if (!cursor[key] || typeof cursor[key] !== "object") cursor[key] = {};
+      cursor = cursor[key];
+    }
+    cursor[parts[parts.length - 1]] = value;
+  }
+
+  function applyEditsToContent() {
+    const edits = loadEdits();
+    window.__resumeEdits = edits;
+    const C = window.DEFAULT_CONTENT;
+    if (!C) return;
+
+    if (edits.site) {
+      C.site = { ...(C.site || {}), ...edits.site };
+      if (Array.isArray(edits.site.heroKeywords)) C.heroKeywords = edits.site.heroKeywords;
+      if (Array.isArray(edits.site.tags)) C.tags = edits.site.tags;
+      if (Array.isArray(edits.site.hiddenModules)) C.site.hiddenModules = edits.site.hiddenModules;
+    }
+    if (edits.education && C.education) {
+      C.education = C.education.map((e) => ({ ...e, ...(edits.education[e.id] || {}) }));
+    }
+    if (edits.works && C.works) {
+      C.works = C.works.map((w) => ({ ...w, ...(edits.works[w.id] || {}) }));
+    }
+  }
+
+  function wantEditMode() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("edit") === "1") return true;
+    if (params.get("edit") === "0") return false;
+    return sessionStorage.getItem("ivory-edit-mode") === "1";
+  }
+
+  function mountChrome() {
+    if (document.querySelector("[data-edit-root]")) return;
+    const root = document.createElement("div");
+    root.className = "edit-chrome";
+    root.setAttribute("data-edit-root", "");
+    root.innerHTML = `
+      <div class="edit-panel" data-edit-panel hidden>
+        <p class="edit-hint">编辑：改文字 · 自动保存在本机。链接与飞书 URL 上传仓库后生效。清空可恢复默认文案。</p>
+        <div class="edit-module-list" data-module-toggles></div>
+      </div>
+      <button type="button" class="edit-fab" data-edit-toggle aria-pressed="false">编辑内容</button>
+      <button type="button" class="edit-fab" data-edit-reset hidden style="background:transparent;color:var(--jade)">清空本地修改</button>
+    `;
+    document.body.appendChild(root);
+
+    const toggles = root.querySelector("[data-module-toggles]");
+    toggles.innerHTML = TOGGLEABLE.map((mod) => `
+      <label class="edit-module-item">
+        <input type="checkbox" data-module-toggle="${mod.id}" checked>
+        <span>${mod.label}</span>
+      </label>
+    `).join("");
+
+    root.querySelector("[data-edit-toggle]").addEventListener("click", () => {
+      setEditMode(!document.body.classList.contains("is-editing"));
+    });
+    root.querySelector("[data-edit-reset]").addEventListener("click", () => {
+      if (!confirm("清空本机保存的文案修改？")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+    });
+
+    toggles.addEventListener("change", (event) => {
+      const input = event.target.closest("[data-module-toggle]");
+      if (!input) return;
+      const id = input.getAttribute("data-module-toggle");
+      const edits = loadEdits();
+      edits.site = edits.site || {};
+      const hidden = new Set(Array.isArray(edits.site.hiddenModules) ? edits.site.hiddenModules : []);
+      if (input.checked) hidden.delete(id);
+      else hidden.add(id);
+      edits.site.hiddenModules = Array.from(hidden);
+      if (window.DEFAULT_CONTENT?.site) {
+        window.DEFAULT_CONTENT.site.hiddenModules = edits.site.hiddenModules;
+      }
+      saveEdits(edits);
+      applyHiddenModules();
+    });
+  }
+
+  function applyHiddenModules() {
+    const hidden = new Set(
+      Array.isArray(window.DEFAULT_CONTENT?.site?.hiddenModules)
+        ? window.DEFAULT_CONTENT.site.hiddenModules
+        : []
+    );
+    ["journey", "lab", "work"].forEach((id) => {
+      const pane = document.querySelector(`#pane-${id}`);
+      const nav = document.querySelector(`.rail__item[data-go="${id}"]`);
+      const on = !hidden.has(id);
+      if (pane) pane.style.display = on ? "" : "none";
+      if (nav) nav.style.display = on ? "" : "none";
+    });
+    document.querySelectorAll("[data-module-toggle]").forEach((input) => {
+      input.checked = !hidden.has(input.getAttribute("data-module-toggle"));
+    });
+  }
+
+  function setEditMode(on) {
+    sessionStorage.setItem("ivory-edit-mode", on ? "1" : "0");
+    document.body.classList.toggle("is-editing", on);
+    const toggle = document.querySelector("[data-edit-toggle]");
+    const panel = document.querySelector("[data-edit-panel]");
+    const reset = document.querySelector("[data-edit-reset]");
+    const topBtn = document.querySelector("#editBtn");
+    if (toggle) {
+      toggle.setAttribute("aria-pressed", String(on));
+      toggle.textContent = on ? "完成编辑" : "编辑内容";
+      toggle.classList.toggle("is-on", on);
+    }
+    if (topBtn) {
+      topBtn.textContent = on ? "完成" : "编辑";
+      topBtn.classList.toggle("is-on", on);
+    }
+    if (panel) panel.hidden = !on;
+    if (reset) reset.hidden = !on;
+    bindEditing(on);
+  }
+
+  function bindEditing(on) {
+    document.querySelectorAll("[data-edit-text]").forEach((node) => {
+      const key = node.getAttribute("data-edit-text");
+      if (key && key.startsWith("tag:")) {
+        node.contentEditable = "false";
+        return;
+      }
+      node.contentEditable = on ? "true" : "false";
+      if (!on || node.dataset.editBound === "1") return;
+      node.dataset.editBound = "1";
+      node.addEventListener("blur", () => {
+        const k = node.getAttribute("data-edit-text");
+        if (!k || k.startsWith("tag:")) return;
+        const edits = loadEdits();
+        edits.site = edits.site || {};
+        pathSet(edits.site, k, node.textContent.trim());
+        if (window.DEFAULT_CONTENT?.site) pathSet(window.DEFAULT_CONTENT.site, k, node.textContent.trim());
+        // also mirror top-level fields used by render
+        if (k === "leadShort" || k === "lead") {
+          window.DEFAULT_CONTENT.site[k] = node.textContent.trim();
+        }
+        saveEdits(edits);
+      });
+    });
+
+    document.querySelectorAll("[data-edit-keyword]").forEach((node) => {
+      node.contentEditable = on ? "true" : "false";
+      if (!on || node.dataset.editBound === "1") return;
+      node.dataset.editBound = "1";
+      node.addEventListener("blur", () => {
+        const index = Number(node.getAttribute("data-edit-keyword"));
+        const field = node.getAttribute("data-edit-field") || "text";
+        if (!Number.isInteger(index) || index < 0) return;
+        const edits = loadEdits();
+        edits.site = edits.site || {};
+        const keywords = Array.isArray(edits.site.heroKeywords)
+          ? edits.site.heroKeywords.slice()
+          : (window.DEFAULT_CONTENT.heroKeywords || []).map((item) => ({ ...item }));
+        if (!keywords[index]) keywords[index] = { year: "", text: "" };
+        keywords[index] = { ...keywords[index], [field]: node.textContent.trim() };
+        edits.site.heroKeywords = keywords;
+        window.DEFAULT_CONTENT.heroKeywords = keywords;
+        saveEdits(edits);
+      });
+    });
+
+    document.querySelectorAll("[data-edit-edu]").forEach((node) => {
+      node.contentEditable = on ? "true" : "false";
+      if (!on || node.dataset.editBound === "1") return;
+      node.dataset.editBound = "1";
+      node.addEventListener("blur", () => {
+        const id = node.getAttribute("data-edit-edu");
+        const field = node.getAttribute("data-edit-field") || "title";
+        const edits = loadEdits();
+        edits.education = edits.education || {};
+        edits.education[id] = { ...(edits.education[id] || {}), [field]: node.textContent.trim() };
+        const edu = (window.DEFAULT_CONTENT.education || []).find((e) => e.id === id);
+        if (edu) edu[field] = node.textContent.trim();
+        saveEdits(edits);
+      });
+    });
+
+    document.querySelectorAll("[data-edit-work]").forEach((node) => {
+      node.contentEditable = on ? "true" : "false";
+      if (!on || node.dataset.editBound === "1") return;
+      node.dataset.editBound = "1";
+      node.addEventListener("blur", () => {
+        const id = node.getAttribute("data-edit-work");
+        const field = node.getAttribute("data-edit-field") || "title";
+        let value = node.textContent.trim();
+        if (field === "detail") value = node.innerText.trim();
+        const edits = loadEdits();
+        edits.works = edits.works || {};
+        edits.works[id] = { ...(edits.works[id] || {}), [field]: value };
+        const work = (window.DEFAULT_CONTENT.works || []).find((w) => w.id === id);
+        if (work) work[field] = value;
+        saveEdits(edits);
+      });
+      node.addEventListener("click", (event) => {
+        if (document.body.classList.contains("is-editing")) event.preventDefault();
+      });
+    });
+  }
+
+  window.__resumeToggleEdit = function () {
+    setEditMode(!document.body.classList.contains("is-editing"));
+  };
+  window.__resumeBindEdit = function () {
+    if (document.body.classList.contains("is-editing")) bindEditing(true);
+  };
+
+  applyEditsToContent();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      mountChrome();
+      applyHiddenModules();
+      if (wantEditMode()) setEditMode(true);
+    });
+  } else {
+    mountChrome();
+    applyHiddenModules();
+    if (wantEditMode()) setEditMode(true);
+  }
+})();
