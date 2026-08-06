@@ -74,7 +74,7 @@
       ? ` data-edit-img="${esc(editKey)}" data-edit-field="label"`
       : "";
     return `<figure class="media" data-lightbox-src="${esc(src)}" data-lightbox-label="${label}" role="button" tabindex="0" title="点击放大">
-      <img src="${esc(src)}" alt="${label}" loading="lazy" />
+      <img src="${esc(src)}" alt="${label}" loading="lazy" decoding="async" />
       <figcaption class="media__cap"${capEdit}>${label || "图片名称"}</figcaption>
     </figure>`;
   }
@@ -226,9 +226,16 @@
       ${modules}`;
   }
 
+  function pickCover(images) {
+    const list = images || [];
+    const jpg = list.find((img) => /\.(jpe?g|webp)$/i.test(img.src || ""));
+    return jpg || list[0] || null;
+  }
+
   function renderLab() {
     const tools = (C.tools || []).map((t) => {
-      const cover = t.images?.[0]?.src ? `style="background-image:url('${esc(asset(t.images[0].src))}')"` : "";
+      const coverImg = pickCover(t.images);
+      const coverSrc = coverImg ? asset(coverImg.src) : "";
       const href = demo(t.demoUrl || "");
       const isXing = t.id === "xingzhen";
       const actions = isXing
@@ -236,12 +243,16 @@
           ? `<a class="btn btn--solid" href="${esc(href)}" target="_blank" rel="noopener">${esc(t.demoLabel || "打开试用")}</a>`
           : "")
         : `
-              ${href ? "" : ""}
               <button type="button" class="btn btn--ghost" data-go="tool-${esc(t.id)}">图文说明</button>
               ${href ? `<a class="btn btn--solid" href="${esc(href)}" target="_blank" rel="noopener">${esc(t.demoLabel || "打开 Demo")}</a>` : ""}`;
+      const coverHtml = coverSrc
+        ? `<div class="feature__cover"${isXing && href ? ` role="link" data-open="${esc(href)}"` : ""}>
+            <img src="${esc(coverSrc)}" alt="${esc(coverImg.label || t.name)}" loading="lazy" decoding="async" />
+          </div>`
+        : `<div class="feature__cover feature__cover--empty"></div>`;
       return `
         <article class="feature">
-          <div class="feature__cover" ${cover} role="${isXing && href ? "link" : ""}" ${isXing && href ? `data-open="${esc(href)}"` : ""}></div>
+          ${coverHtml}
           <div class="feature__body">
             <p class="eyebrow">${esc(t.sourceLabel || "Tool")}</p>
             <h3 class="h3" data-edit-tool="${esc(t.id)}" data-edit-field="name">${esc(t.name)}</h3>
@@ -382,22 +393,40 @@
     "tool-topic-ai": () => renderTool("topic-ai"),
   };
 
-  function hydrate() {
-    ROUTES.forEach((r) => {
-      const pane = $(`#pane-${r}`);
-      if (pane && RENDER[r]) pane.innerHTML = RENDER[r]();
-    });
-    // sync site fields in chrome
+  const renderedPanes = new Set();
+
+  function syncChrome() {
     const nameZh = site.nameZh || site.name || "王瑞泽";
     $$("[data-edit-text='nameZh']").forEach((n) => { if (!n.closest(".pane")) n.textContent = nameZh; });
     $$("[data-edit-text='email']").forEach((n) => { if (n.classList.contains("rail__contact")) n.textContent = site.email || ""; });
     $$("[data-edit-text='phone']").forEach((n) => { if (n.classList.contains("rail__contact")) n.textContent = site.phone || ""; });
     $$("[data-edit-text='status']").forEach((n) => { n.textContent = site.status || "开放全职机会"; });
+  }
+
+  function ensurePane(route, { force } = {}) {
+    if (!ROUTES.includes(route)) return;
+    if (!force && renderedPanes.has(route)) return;
+    const pane = $(`#pane-${route}`);
+    if (!pane || !RENDER[route]) return;
+    pane.innerHTML = RENDER[route]();
+    renderedPanes.add(route);
     if (typeof window.__resumeBindEdit === "function") window.__resumeBindEdit();
-    if (window.__spiralHero && typeof window.__spiralHero.rebuild === "function") {
+    if (route === "home" && window.__spiralHero && typeof window.__spiralHero.rebuild === "function") {
       requestAnimationFrame(function () { window.__spiralHero.rebuild(); });
     }
   }
+
+  function hydrate() {
+    // 首屏只渲染一级页，详情页进入时再挂载，避免一次拉取全部大图
+    MAIN.forEach((r) => ensurePane(r));
+    syncChrome();
+  }
+
+  window.__resumeHydrate = function () {
+    renderedPanes.clear();
+    hydrate();
+    ensurePane(state.route, { force: true });
+  };
 
   function setTrail(route) {
     const parent = PARENT[route];
@@ -430,6 +459,7 @@
     if (!corridor || !pane) return;
 
     state.route = route;
+    ensurePane(route);
     $("#pageTitle").textContent = TITLES[route] || route;
     setTrail(route);
 
@@ -552,11 +582,12 @@
   }
 
   // expose for editor
-  window.__resumeHydrate = hydrate;
   window.__portfolioGo = go;
   window.__portfolioContent = C;
 
   hydrate();
   bind();
-  go(routeFromHash(), { silent: true });
+  const bootRoute = routeFromHash();
+  ensurePane(bootRoute);
+  go(bootRoute, { silent: true });
 })();
