@@ -108,8 +108,8 @@
     }
 
     function render(rotationDeg) {
-      const radius = Math.min(width * 0.40, 270);
-      const usableH = height * 0.82;
+      const radius = Math.min(width * 0.39, 258);
+      const usableH = height * 0.80;
       const topY = -usableH / 2;
       const rowH = usableH / Math.max(1, stepCount - 1);
       const editing = document.body.classList.contains("is-editing");

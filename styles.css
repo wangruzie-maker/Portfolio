@@ -809,12 +809,12 @@ body.has-lightbox .lightbox { pointer-events: auto; }
 /* —— Golden spiral staircase (from prior portfolio) —— */
 .home__spiral {
   position: relative;
-  min-height: min(88vh, 860px);
+  min-height: min(85vh, 820px);
 }
 .sx-spiral {
   position: relative;
   width: 100%;
-  height: min(88vh, 860px);
+  height: min(85vh, 820px);
   perspective: 1600px;
   pointer-events: none;
 }

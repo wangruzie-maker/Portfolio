@@ -168,26 +168,26 @@
 
   function renderJourney() {
     const edu = (C.education || []).map((e) => `
-      <article class="card card--lift" style="cursor:default">
+      <article class="card" style="cursor:default">
         <div class="card__meta"><span class="kind">${esc(e.kind || "教育")}</span><span>${esc(e.period)}</span></div>
         <h3 class="h3" data-edit-edu="${esc(e.id)}" data-edit-field="title">${esc(e.title)}</h3>
         <p data-edit-edu="${esc(e.id)}" data-edit-field="body">${esc(e.body)}</p>
       </article>`).join("");
 
     const exps = (C.experiences || []).map((e) => `
-      <button type="button" class="card card--lift" data-go="${esc(e.id)}">
+      <button type="button" class="card" data-go="${esc(e.id)}">
         <div class="card__meta"><span class="kind">实习</span><span>${esc(e.period)}</span></div>
         <h3 class="h3">${esc(e.company)} · ${esc(e.role)}</h3>
         <p>${esc(e.oneLiner || e.cardSummary || "")}</p>
-        ${metricsHtml((e.modules || []).flatMap((m) => m.metrics || []).slice(0, 3), "点击查看简介与试用")}
-        <div class="card__arrow">简介与试用 →</div>
+        ${metricsHtml((e.modules || []).flatMap((m) => m.metrics || []).slice(0, 3), "点击查看详情")}
+        <div class="card__arrow">查看详情 →</div>
       </button>`).join("");
 
     return `
       <div class="section-head">
         <p class="eyebrow">[ Journey ]</p>
         <h2 class="h2">教育背景 / 实习</h2>
-        <p class="muted">点实习条目查看简介并进入相关试用。</p>
+        <p class="muted">山东大学 / 重庆大学 · 百度 · 趣丸 · 科大讯飞 · 紫讯。点实习条目进入详情。</p>
       </div>
       <p class="eyebrow" style="margin-top:0.5rem">Education</p>
       <div class="grid-2" style="margin-bottom:1.4rem">${edu}</div>
@@ -195,73 +195,45 @@
       <div class="grid-2">${exps}</div>`;
   }
 
-  function trialLinksForExp(e) {
-    const links = [];
-    const seen = new Set();
-    const push = (key, html) => {
-      if (!html || seen.has(key)) return;
-      seen.add(key);
-      links.push(html);
-    };
-    const tools = C.tools || [];
-
-    // Baidu: trial + public first
-    if (e.id === "baidu") {
-      const trial = demo(e.trialUrl || "./demos/xingzhen/index.html");
-      const pub = e.publicUrl || "http://xingzhenworld.com/#/home";
-      push("xingzhen-trial", `<a class="btn btn--solid" href="${esc(trial)}" target="_blank" rel="noopener">打开星阵试用</a>`);
-      push("xingzhen-public", `<a class="btn btn--ghost" href="${esc(pub)}" target="_blank" rel="noopener">公网站点</a>`);
-    }
-
-    const anchors = [...new Set((e.modules || []).map((m) => m.toolAnchor).filter(Boolean))];
-    anchors.forEach((id) => {
-      const t = tools.find((x) => x.id === id);
-      if (!t) return;
-      const href = demo(t.demoUrl || "");
-      if (href) {
-        const key = id === "xingzhen" ? "xingzhen-trial" : `${id}-demo`;
-        push(key, `<a class="btn btn--solid" href="${esc(href)}" target="_blank" rel="noopener">${esc(t.demoLabel || `打开 ${t.name}`)}</a>`);
-      }
-      if (t.publicUrl) {
-        push(`${id}-public`, `<a class="btn btn--ghost" href="${esc(t.publicUrl)}" target="_blank" rel="noopener">公网站点</a>`);
-      }
-    });
-
-    if (e.id === "quwan") {
-      const t = tools.find((x) => x.id === "wefly");
-      const href = t && demo(t.demoUrl || "");
-      if (href) {
-        push("wefly-demo", `<a class="btn btn--solid" href="${esc(href)}" target="_blank" rel="noopener">${esc(t.demoLabel || "打开 Wefly 演示")}</a>`);
-      }
-    }
-    return links.join("\n");
-  }
-
   function renderExp(id) {
     const e = (C.experiences || []).find((x) => x.id === id);
     if (!e) return `<p class="muted">未找到经历</p>`;
-    const cover = (e.modules || []).flatMap((m) => m.images || []).slice(0, 3);
-    const links = trialLinksForExp(e);
+    const pub = e.publicUrl || (e.id === "baidu" ? "http://xingzhenworld.com/#/home" : "");
+    const modules = (e.modules || []).map((m) => {
+      const imgs = m.images || [];
+      const gridClass = imgs.length === 4 ? "media-grid media-grid--4" : "media-grid";
+      let toolBtn = "";
+      if (m.toolAnchor === "xingzhen") {
+        toolBtn = `
+          <a class="btn btn--solid" href="${esc(demo("./demos/xingzhen/index.html"))}" target="_blank" rel="noopener">打开星阵试用 →</a>
+          ${pub ? `<a class="btn btn--ghost" href="${esc(pub)}" target="_blank" rel="noopener">公网站点</a>` : ""}`;
+      } else if (m.toolAnchor) {
+        toolBtn = `<button type="button" class="btn btn--ghost" data-go="tool-${esc(m.toolAnchor)}">相关工具 →</button>`;
+      }
+      return `
+      <article class="module">
+        <h3 class="h3" data-edit-mod="${esc(e.id)}.${esc(m.id)}" data-edit-field="title">${esc(m.title)}</h3>
+        <p class="muted" data-edit-mod="${esc(e.id)}.${esc(m.id)}" data-edit-field="bodyBrief">${esc(m.bodyBrief || "")}</p>
+        ${metricsHtml(m.metrics, "结果指标")}
+        <div class="module__body" data-edit-mod="${esc(e.id)}.${esc(m.id)}" data-edit-field="body">${nl(m.body || "")}</div>
+        <div class="${gridClass}">${imgs.map((img, ii) => mediaFigure(img, `exp.${e.id}.${m.id}.${ii}`)).join("")}</div>
+        ${toolBtn ? `<div class="btn-row" style="margin-top:.9rem">${toolBtn}</div>` : ""}
+      </article>`;
+    }).join("");
 
     return `
       <button type="button" class="back" data-go="journey">← 返回 Journey</button>
-      <div class="simple-panel">
-        <div class="simple-panel__main">
-          <p class="eyebrow">
-            <span data-edit-exp="${esc(e.id)}" data-edit-field="period">${esc(e.period)}</span>
-            ·
-            <span data-edit-exp="${esc(e.id)}" data-edit-field="role">${esc(e.role)}</span>
-          </p>
-          <h2 class="h2" data-edit-exp="${esc(e.id)}" data-edit-field="company">${esc(e.company)}</h2>
-          <p class="lead" data-edit-exp="${esc(e.id)}" data-edit-field="detailIntro">${esc(e.oneLiner || e.detailIntro || "")}</p>
-          <div class="tags">${(e.tags || []).map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</div>
-          ${metricsHtml((e.modules || []).flatMap((m) => m.metrics || []).slice(0, 4), "结果指标")}
-          <div class="btn-row" style="margin-top:1rem">${links || `<span class="muted">暂无在线试用，可返回 Lab 查看工具。</span>`}</div>
-        </div>
-        <div class="simple-panel__media">
-          ${cover.map((img, ii) => mediaFigure(img, `exp.${e.id}.cover.${ii}`)).join("")}
-        </div>
-      </div>`;
+      <div class="detail-hero">
+        <p class="eyebrow">
+          <span data-edit-exp="${esc(e.id)}" data-edit-field="period">${esc(e.period)}</span>
+          ·
+          <span data-edit-exp="${esc(e.id)}" data-edit-field="role">${esc(e.role)}</span>
+        </p>
+        <h2 class="h2" data-edit-exp="${esc(e.id)}" data-edit-field="company">${esc(e.company)}</h2>
+        <p class="lead" data-edit-exp="${esc(e.id)}" data-edit-field="detailIntro">${esc(e.detailIntro || e.oneLiner || "")}</p>
+        <div class="tags">${(e.tags || []).map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</div>
+      </div>
+      ${modules}`;
   }
 
   function pickCover(images) {
@@ -354,7 +326,7 @@
         <div class="card__meta"><span class="kind">实习入口</span><span>${esc(e.period)}</span></div>
         <h3 class="h3">${esc(e.company)}</h3>
         <p>${esc(e.cardSummary || e.oneLiner || "")}</p>
-        <div class="card__arrow">简介与试用 →</div>
+        <div class="card__arrow">进入详情 →</div>
       </button>`).join("");
 
     return `
