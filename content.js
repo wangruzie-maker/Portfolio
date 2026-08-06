@@ -12,7 +12,7 @@ window.DEFAULT_CONTENT = {
     "heroCtaPrimary": "查看经历",
     "heroCtaSecondary": "体验工具",
     "toolsSectionTitle": "工具体验",
-    "toolsSectionDesc": "Wefly Agent · 星阵平台 · AI 选题工具。进入集合页查看说明，面试可打开静态 Demo。",
+    "toolsSectionDesc": "Wefly Agent · 星阵平台 · AI 选题工具。简介如下，面试可直接打开试用 / Demo。",
     "toolsEntryLabel": "进入工具集合",
     "worksSectionDesc": "实拍与 AIGC 作品说明；精选成片见飞书合集。",
     "worksEntryLabel": "查看作品说明",
@@ -35,6 +35,8 @@ window.DEFAULT_CONTENT = {
         "选题工具",
         "AI产品传播"
       ],
+      "trialUrl": "./demos/xingzhen/index.html",
+      "publicUrl": "http://xingzhenworld.com/#/home",
       "modules": [
         {
           "id": "b1",
@@ -98,11 +100,6 @@ window.DEFAULT_CONTENT = {
             {
               "label": "文案输出",
               "src": "assets/covers/detail/baidu-b2-3.jpg",
-              "link": ""
-            },
-            {
-              "label": "语料资产",
-              "src": "assets/covers/detail/baidu-b2-4.jpg",
               "link": ""
             }
           ]
@@ -496,9 +493,24 @@ window.DEFAULT_CONTENT = {
       "demoLabel": "打开静态交互示意",
       "images": [
         {
-          "label": "选题工具 · 工作台",
-          "src": "assets/covers/detail/tool-topic-ai-0.jpg",
+          "label": "选题工具 · 语料池",
+          "src": "assets/covers/detail/baidu-b2-0.png",
           "link": "./demos/topic-ai/index.html"
+        },
+        {
+          "label": "选题工具 · 分析结果",
+          "src": "assets/covers/detail/baidu-b2-1.jpg",
+          "link": ""
+        },
+        {
+          "label": "选题输出样例",
+          "src": "assets/covers/detail/baidu-b2-2.jpg",
+          "link": ""
+        },
+        {
+          "label": "文案输出",
+          "src": "assets/covers/detail/baidu-b2-3.jpg",
+          "link": ""
         }
       ]
     }

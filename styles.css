@@ -485,6 +485,51 @@ img { max-width: 100%; display: block; }
   gap: 0.75rem;
   margin-top: 1rem;
 }
+.media-grid--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+@media (max-width: 980px) {
+  .media-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .media-grid--4 { grid-template-columns: 1fr; }
+}
+
+/* —— Simple intro + trial panel —— */
+.simple-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(220px, 0.85fr);
+  gap: 1.4rem 1.8rem;
+  align-items: start;
+  margin-top: 0.35rem;
+}
+.simple-panel--stack {
+  grid-template-columns: 1fr;
+}
+.simple-panel__main .lead { max-width: 40rem; }
+.simple-panel__media {
+  display: grid;
+  gap: 0.75rem;
+}
+.simple-panel__media .media img {
+  aspect-ratio: 16/10;
+}
+@media (max-width: 860px) {
+  .simple-panel { grid-template-columns: 1fr; }
+}
+
+/* —— P1 card / feature lift —— */
+.card--lift,
+.feature--lift {
+  transition: transform .35s var(--ease), box-shadow .35s var(--ease), border-color .35s;
+}
+.card--lift:hover,
+.feature--lift:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-soft);
+  border-color: rgba(168,137,85,.42);
+}
 .media {
   position: relative;
   border: 1px solid var(--line);
@@ -764,12 +809,12 @@ body.has-lightbox .lightbox { pointer-events: auto; }
 /* —— Golden spiral staircase (from prior portfolio) —— */
 .home__spiral {
   position: relative;
-  min-height: min(82vh, 780px);
+  min-height: min(88vh, 860px);
 }
 .sx-spiral {
   position: relative;
   width: 100%;
-  height: min(82vh, 780px);
+  height: min(88vh, 860px);
   perspective: 1600px;
   pointer-events: none;
 }
