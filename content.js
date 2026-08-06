@@ -1,4 +1,4 @@
-/* Auto-synced from browser global sync. Original backed up as content.js.bak */
+/* Synced from portfolio edit pack 2026-08-06T02:52:14.568Z */
 window.DEFAULT_CONTENT = {
   "version": 3,
   "site": {
@@ -15,7 +15,9 @@ window.DEFAULT_CONTENT = {
     "toolsSectionDesc": "Wefly Agent · 星阵平台 · AI 选题工具。进入集合页查看说明，面试可打开静态 Demo。",
     "toolsEntryLabel": "进入工具集合",
     "worksSectionDesc": "实拍与 AIGC 作品说明；精选成片见飞书合集。",
-    "worksEntryLabel": "查看作品说明"
+    "worksEntryLabel": "查看作品说明",
+    "nameZh": "王瑞泽",
+    "status": "产品 / 内容"
   },
   "experiences": [
     {
@@ -46,22 +48,22 @@ window.DEFAULT_CONTENT = {
           "toolAnchor": "xingzhen",
           "images": [
             {
-              "label": "星阵 · 工作台",
+              "label": "星阵 · 数据闭环",
               "src": "assets/covers/detail/baidu-b1-0.png",
               "link": ""
             },
             {
-              "label": "星阵 · 批量生产",
+              "label": "星阵 · 单号工作台",
               "src": "assets/covers/detail/baidu-b1-1.png",
               "link": ""
             },
             {
-              "label": "星阵 · 数据闭环",
+              "label": "星阵 · 批量工作台",
               "src": "assets/covers/detail/baidu-b1-2.png",
               "link": ""
             },
             {
-              "label": "星阵 · 更多界面",
+              "label": "星阵 · 资产/发布清单",
               "src": "assets/covers/detail/baidu-b1-3.jpg",
               "link": ""
             }
@@ -94,12 +96,12 @@ window.DEFAULT_CONTENT = {
               "link": ""
             },
             {
-              "label": "图示 4",
+              "label": "文案输出",
               "src": "assets/covers/detail/baidu-b2-3.jpg",
               "link": ""
             },
             {
-              "label": "图示 5",
+              "label": "语料资产",
               "src": "assets/covers/detail/baidu-b2-4.jpg",
               "link": ""
             }
@@ -450,9 +452,9 @@ window.DEFAULT_CONTENT = {
         "日产 100+",
         "成本下降 70%+"
       ],
-      "demoNote": "内网部署，线上无法直接打开；面试可投屏演示。右侧为平台界面截图，与百度经历中的星阵模块同源。",
-      "demoUrl": "",
-      "demoLabel": "内网演示（投屏）",
+      "demoNote": "公网已部署产品能力；此页为可交互 Demo（占位数据）。",
+      "demoUrl": "./demos/xingzhen/index.html",
+      "demoLabel": "打开星阵试用",
       "images": [
         {
           "label": "星阵 · 工作台",
@@ -563,11 +565,59 @@ window.DEFAULT_CONTENT = {
         }
       ]
     }
+  ],
+  "education": [
+    {
+      "id": "sdu",
+      "period": "2024.9–2027.6",
+      "kind": "教育",
+      "title": "山东大学（985）新闻传播学硕士",
+      "body": "新闻传播学硕士在读，计算传播方向，GPA（90.2/100）；参与国家社会科学基金项目科研活动，负责著作九国数字内容出版领域的日语板块，在期刊论文中通过大批量文本的深度学习微调及自然语言处理进行统计分析。担任山东大学宣传部干事和影视协会指导，获得山东大学一等奖学金。"
+    },
+    {
+      "id": "cqu",
+      "period": "2020.9–2024.6",
+      "kind": "教育",
+      "title": "重庆大学（985）广播电视编导 / 金融学双学位学士",
+      "body": "广播电视编导与金融学双学位，GPA（3.82/4.0），曾获得四次综合奖学金，2024届重庆大学优秀毕业生。参与纪录片、故事片等六部作品创作，在校展映并获张国立、米家山等业内专家肯定。"
+    }
+  ],
+  "tags": [
+    "英语六级",
+    "日语 N1",
+    "Claude / Cursor",
+    "Vibe Coding",
+    "Figma / 墨刀",
+    "Python / SPSS",
+    "PS / PR / AU",
+    "跨团队协作"
+  ],
+  "heroKeywords": [
+    {
+      "year": "2020",
+      "text": "编导 × 金融 双学位"
+    },
+    {
+      "year": "2023",
+      "text": "直播运营 · 数据分析"
+    },
+    {
+      "year": "2024",
+      "text": "新传硕士 · NLP 研究"
+    },
+    {
+      "year": "2025",
+      "text": "海外内容增长"
+    },
+    {
+      "year": "2026",
+      "text": "Agent 产品 · 市场 SOP"
+    }
   ]
 };
 
 
-/* —— 本仓库增量：教育条目 + 资源基址 + 星阵高保真入口 —— */
+/* —— 本仓库增量：资源基址 + 星阵试用入口 —— */
 window.ASSET_BASE = window.ASSET_BASE || "./";
 window.assetUrl = function assetUrl(src) {
   if (!src) return "";
@@ -578,7 +628,6 @@ window.assetUrl = function assetUrl(src) {
 window.demoUrl = function demoUrl(src) {
   if (!src) return "";
   if (/^https?:/i.test(src)) return src;
-  // 本仓库内 demo 始终走相对路径，避免指到错误域名
   if (src.startsWith("./demos/") || src.startsWith("demos/") ||
       src.startsWith("./xingzhen") || src.startsWith("xingzhen")) {
     return src.replace(/^\.\//, "./");
@@ -587,40 +636,10 @@ window.demoUrl = function demoUrl(src) {
 };
 
 if (window.DEFAULT_CONTENT) {
-  window.DEFAULT_CONTENT.education = window.DEFAULT_CONTENT.education || [
-    {
-      id: "sdu",
-      period: "2024.9–2027.6",
-      kind: "教育",
-      title: "山东大学（985）新闻传播学硕士",
-      body: "新闻传播学硕士在读，计算传播方向，GPA（90.2/100）；参与国家社会科学基金项目科研活动，负责著作九国数字内容出版领域的日语板块，在期刊论文中通过大批量文本的深度学习微调及自然语言处理进行统计分析。担任山东大学宣传部干事和影视协会指导，获得山东大学一等奖学金。"
-    },
-    {
-      id: "cqu",
-      period: "2020.9–2024.6",
-      kind: "教育",
-      title: "重庆大学（985）广播电视编导 / 金融学双学位学士",
-      body: "广播电视编导与金融学双学位，GPA（3.82/4.0），曾获得四次综合奖学金，2024届重庆大学优秀毕业生。参与纪录片、故事片等六部作品创作，在校展映并获张国立、米家山等业内专家肯定。"
-    }
-  ];
-  window.DEFAULT_CONTENT.tags = window.DEFAULT_CONTENT.tags || [
-    "英语六级", "日语 N1", "Claude / Cursor", "Vibe Coding",
-    "Figma / 墨刀", "Python / SPSS", "PS / PR / AU", "跨团队协作"
-  ];
-  window.DEFAULT_CONTENT.heroKeywords = window.DEFAULT_CONTENT.heroKeywords || [
-    { year: "2020", text: "编导 × 金融 双学位" },
-    { year: "2023", text: "直播运营 · 数据分析" },
-    { year: "2024", text: "新传硕士 · NLP 研究" },
-    { year: "2025", text: "海外内容增长" },
-    { year: "2026", text: "Agent 产品 · 市场 SOP" }
-  ];
-  window.DEFAULT_CONTENT.site = window.DEFAULT_CONTENT.site || {};
-  window.DEFAULT_CONTENT.site.nameZh = window.DEFAULT_CONTENT.site.nameZh || "王瑞泽";
-  window.DEFAULT_CONTENT.site.status = window.DEFAULT_CONTENT.site.status || "开放全职机会";
   const xz = (window.DEFAULT_CONTENT.tools || []).find(t => t.id === "xingzhen");
   if (xz) {
-    xz.demoUrl = "./demos/xingzhen/index.html";
-    xz.demoLabel = "打开星阵试用";
-    xz.demoNote = "公网已部署产品能力；此页为可交互 Demo（占位数据）。";
+    xz.demoUrl = xz.demoUrl || "./demos/xingzhen/index.html";
+    xz.demoLabel = xz.demoLabel || "打开星阵试用";
+    xz.demoNote = xz.demoNote || "公网已部署产品能力；此页为可交互 Demo（占位数据）。";
   }
 }

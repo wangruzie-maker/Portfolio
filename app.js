@@ -73,7 +73,11 @@
     const capEdit = editKey
       ? ` data-edit-img="${esc(editKey)}" data-edit-field="label"`
       : "";
+    const replaceBtn = editKey
+      ? `<button type="button" class="media__replace" data-image-replace="${esc(editKey)}">换图</button>`
+      : "";
     return `<figure class="media" data-lightbox-src="${esc(src)}" data-lightbox-label="${label}" role="button" tabindex="0" title="点击放大">
+      ${replaceBtn}
       <img src="${esc(src)}" alt="${label}" loading="lazy" decoding="async" />
       <figcaption class="media__cap"${capEdit}>${label || "图片名称"}</figcaption>
     </figure>`;
@@ -246,13 +250,15 @@
               <button type="button" class="btn btn--ghost" data-go="tool-${esc(t.id)}">图文说明</button>
               ${href ? `<a class="btn btn--solid" href="${esc(href)}" target="_blank" rel="noopener">${esc(t.demoLabel || "打开 Demo")}</a>` : ""}`;
       const coverHtml = coverSrc
-        ? `<div class="feature__cover"${isXing && href ? ` role="link" data-open="${esc(href)}"` : ""}>
+        ? `<div class="feature__cover" data-cover-key="tool.${esc(t.id)}.cover"${isXing && href ? ` role="link" data-open="${esc(href)}"` : ""}>
+            <button type="button" class="feature__replace" data-image-replace="tool.${esc(t.id)}.cover">换图</button>
             <img src="${esc(coverSrc)}" alt="${esc(coverImg.label || t.name)}" loading="lazy" decoding="async" />
           </div>`
-        : `<div class="feature__cover feature__cover--empty"></div>`;
+        : `<div class="feature__cover feature__cover--empty" data-cover-key="tool.${esc(t.id)}.cover">
+            <button type="button" class="feature__replace" data-image-replace="tool.${esc(t.id)}.cover">换图</button>
+          </div>`;
       return `
         <article class="feature">
-          ${coverHtml}
           <div class="feature__body">
             <p class="eyebrow">${esc(t.sourceLabel || "Tool")}</p>
             <h3 class="h3" data-edit-tool="${esc(t.id)}" data-edit-field="name">${esc(t.name)}</h3>
@@ -264,6 +270,7 @@
             </ul>`}
             <div class="btn-row">${actions}</div>
           </div>
+          ${coverHtml}
         </article>`;
     }).join("");
 
@@ -519,6 +526,7 @@
     document.addEventListener("click", (e) => {
       const light = e.target.closest("[data-lightbox-src]");
       if (light) {
+        if (e.target.closest("[data-image-replace]")) return;
         if (document.body.classList.contains("is-editing") && e.target.closest("[data-edit-img]")) return;
         e.preventDefault();
         openLightbox(light.getAttribute("data-lightbox-src"), light.getAttribute("data-lightbox-label") || "");
@@ -526,6 +534,7 @@
       }
       const openEl = e.target.closest("[data-open]");
       if (openEl) {
+        if (e.target.closest("[data-image-replace]")) return;
         const url = openEl.getAttribute("data-open");
         if (url) window.open(url, "_blank", "noopener");
         return;

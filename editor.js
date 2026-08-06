@@ -7,6 +7,7 @@
   "use strict";
 
   const STORAGE_KEY = "ivory-portfolio-edits-v1";
+  const MAX_IMAGE_BYTES = 1200 * 1024;
   const AUTH_KEY = "ivory-edit-auth";
   const EDIT_PASS = "020410";
   const TOGGLEABLE = [
@@ -179,6 +180,12 @@
       <button type="button" class="edit-fab" data-edit-reset hidden style="background:transparent;color:var(--jade)">清空本地修改</button>
       <button type="button" class="edit-fab" data-edit-lock hidden style="background:transparent;color:var(--ink-3)">锁定编辑</button>
     `;
+    const file = document.createElement("input");
+    file.type = "file";
+    file.accept = "image/*";
+    file.hidden = true;
+    file.setAttribute("data-file-input", "");
+    document.body.appendChild(file);
     document.body.appendChild(root);
 
     const toggles = root.querySelector("[data-module-toggles]");
@@ -269,6 +276,7 @@
     if (lock) lock.hidden = !isAuthed();
     if (expBtn) expBtn.hidden = !isAuthed();
     bindEditing(on);
+    setupImageReplace(on);
   }
 
   function bindUnlockGestures() {
@@ -501,12 +509,146 @@
     });
   }
 
+
+  let pendingReplaceKey = null;
+
+  function writeImageToContent(key, dataUrl) {
+    const parts = String(key || "").split(".");
+    const C = window.DEFAULT_CONTENT;
+    if (!C) return;
+    if (parts[0] === "exp" && parts.length >= 4) {
+      const expId = parts[1];
+      const mid = parts[2];
+      const idx = Number(parts[3]);
+      const exp = (C.experiences || []).find((e) => e.id === expId);
+      const mod = exp && (exp.modules || []).find((m) => m.id === mid);
+      if (mod && mod.images && mod.images[idx]) mod.images[idx].src = dataUrl;
+    } else if (parts[0] === "work" && parts.length >= 3) {
+      const work = (C.works || []).find((w) => w.id === parts[1]);
+      const idx = Number(parts[2]);
+      if (work && work.images && work.images[idx]) work.images[idx].src = dataUrl;
+    } else if (parts[0] === "tool" && parts.length >= 2) {
+      const tool = (C.tools || []).find((x) => x.id === parts[1]);
+      if (!tool) return;
+      if (parts[2] === "cover") {
+        if (!tool.images) tool.images = [{ label: tool.name || "封面", src: dataUrl }];
+        else if (!tool.images[0]) tool.images[0] = { label: tool.name || "封面", src: dataUrl };
+        else tool.images[0].src = dataUrl;
+      } else {
+        const idx = Number(parts[2]);
+        if (tool.images && tool.images[idx]) tool.images[idx].src = dataUrl;
+      }
+    }
+  }
+
+  function saveImageEdit(key, dataUrl) {
+    const parts = String(key || "").split(".");
+    const edits = loadEdits();
+    if (parts[0] === "exp" && parts.length >= 4) {
+      const [, expId, mid, idxStr] = parts;
+      const idx = Number(idxStr);
+      edits.experiences = edits.experiences || {};
+      edits.experiences[expId] = edits.experiences[expId] || {};
+      edits.experiences[expId].modules = edits.experiences[expId].modules || {};
+      edits.experiences[expId].modules[mid] = edits.experiences[expId].modules[mid] || {};
+      const imgs = edits.experiences[expId].modules[mid].images || {};
+      imgs[idx] = { ...(imgs[idx] || {}), src: dataUrl };
+      edits.experiences[expId].modules[mid].images = imgs;
+    } else if (parts[0] === "work" && parts.length >= 3) {
+      const [, workId, idxStr] = parts;
+      const idx = Number(idxStr);
+      edits.works = edits.works || {};
+      edits.works[workId] = edits.works[workId] || {};
+      edits.works[workId].images = edits.works[workId].images || {};
+      edits.works[workId].images[idx] = { ...(edits.works[workId].images[idx] || {}), src: dataUrl };
+    } else if (parts[0] === "tool" && parts.length >= 2) {
+      const toolId = parts[1];
+      edits.tools = edits.tools || {};
+      edits.tools[toolId] = edits.tools[toolId] || {};
+      if (parts[2] === "cover") {
+        edits.tools[toolId].images = edits.tools[toolId].images || {};
+        edits.tools[toolId].images[0] = { ...(edits.tools[toolId].images[0] || {}), src: dataUrl };
+      } else {
+        const idx = Number(parts[2]);
+        edits.tools[toolId].images = edits.tools[toolId].images || {};
+        edits.tools[toolId].images[idx] = { ...(edits.tools[toolId].images[idx] || {}), src: dataUrl };
+      }
+    }
+    writeImageToContent(key, dataUrl);
+    try {
+      saveEdits(edits);
+    } catch (err) {
+      window.alert("图片过大，本机存不下。请换更小的图（建议 < 1MB）后再试。");
+      return false;
+    }
+    return true;
+  }
+
+  function setupImageReplace(on) {
+    const input = document.querySelector("[data-file-input]");
+    if (!input) return;
+    document.querySelectorAll("[data-image-replace]").forEach((btn) => {
+      btn.hidden = !on;
+      if (!on) return;
+      if (btn.dataset.replaceBound === "1") return;
+      btn.dataset.replaceBound = "1";
+      btn.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        pendingReplaceKey = btn.getAttribute("data-image-replace");
+        if (!pendingReplaceKey) return;
+        input.value = "";
+        input.click();
+      });
+    });
+    if (input.dataset.replaceBound === "1") return;
+    input.dataset.replaceBound = "1";
+    input.addEventListener("change", () => {
+      const file = input.files && input.files[0];
+      const key = pendingReplaceKey;
+      pendingReplaceKey = null;
+      if (!file || !key) return;
+      if (!file.type.startsWith("image/")) {
+        window.alert("请选择图片文件");
+        return;
+      }
+      if (file.size > MAX_IMAGE_BYTES) {
+        window.alert("图片请控制在约 1.2MB 以内（同步包与本机存储限制）");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = String(reader.result || "");
+        if (!saveImageEdit(key, dataUrl)) return;
+        // live update DOM
+        const btn = document.querySelector(`[data-image-replace="${key}"]`);
+        if (btn) {
+          const host = btn.closest(".media, .feature__cover");
+          const img = host && host.querySelector("img");
+          if (img) img.src = dataUrl;
+          if (host && host.hasAttribute("data-lightbox-src")) {
+            host.setAttribute("data-lightbox-src", dataUrl);
+          }
+        }
+        if (typeof window.__resumeHydrate === "function") {
+          // keep current route content fresh without full wipe of other panes if possible
+          window.__resumeHydrate();
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+
   window.__resumeToggleEdit = function () {
     if (!requireAuth()) return;
     setEditMode(!document.body.classList.contains("is-editing"));
   };
   window.__resumeBindEdit = function () {
-    if (document.body.classList.contains("is-editing")) bindEditing(true);
+    if (document.body.classList.contains("is-editing")) {
+      bindEditing(true);
+      setupImageReplace(true);
+    }
   };
 
   function boot() {
