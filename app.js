@@ -242,10 +242,10 @@
       const coverSrc = coverImg ? asset(coverImg.src) : "";
       const href = demo(t.demoUrl || "");
       const isXing = t.id === "xingzhen";
+      const publicUrl = t.publicUrl || "";
       const actions = isXing
-        ? (href
-          ? `<a class="btn btn--solid" href="${esc(href)}" target="_blank" rel="noopener">${esc(t.demoLabel || "打开试用")}</a>`
-          : "")
+        ? `${href ? `<a class="btn btn--solid" href="${esc(href)}" target="_blank" rel="noopener">${esc(t.demoLabel || "打开星阵试用")}</a>` : ""}
+           ${publicUrl ? `<a class="btn btn--ghost" href="${esc(publicUrl)}" target="_blank" rel="noopener">公网站点</a>` : ""}`
         : `
               <button type="button" class="btn btn--ghost" data-go="tool-${esc(t.id)}">图文说明</button>
               ${href ? `<a class="btn btn--solid" href="${esc(href)}" target="_blank" rel="noopener">${esc(t.demoLabel || "打开 Demo")}</a>` : ""}`;
@@ -364,12 +364,16 @@
     const page = C.worksPage || {};
     const feishu = page.feishuUrl || "";
     const list = (C.works || []).map((w) => `
-      <article class="module" id="work-${esc(w.id)}">
-        <p class="eyebrow">${esc(w.type || "")}</p>
-        <h3 class="h3" data-edit-work="${esc(w.id)}" data-edit-field="title">${esc(w.title)}</h3>
-        <p class="muted" data-edit-work="${esc(w.id)}" data-edit-field="summary">${esc(w.summary || "")}</p>
-        <div class="module__body" data-edit-work="${esc(w.id)}" data-edit-field="detail">${nl(w.detail || "")}</div>
-        <div class="media-grid">${(w.images || []).map((img, ii) => mediaFigure(img, `work.${w.id}.${ii}`)).join("")}</div>
+      <article class="work-row" id="work-${esc(w.id)}">
+        <div class="work-row__text">
+          <p class="eyebrow">${esc(w.type || "")}</p>
+          <h3 class="h3" data-edit-work="${esc(w.id)}" data-edit-field="title">${esc(w.title)}</h3>
+          <p class="muted" data-edit-work="${esc(w.id)}" data-edit-field="summary">${esc(w.summary || "")}</p>
+          <div class="module__body" data-edit-work="${esc(w.id)}" data-edit-field="detail">${nl(w.detail || "")}</div>
+        </div>
+        <div class="work-row__media">
+          ${(w.images || []).map((img, ii) => mediaFigure(img, `work.${w.id}.${ii}`)).join("") || `<div class="feature__cover feature__cover--empty"></div>`}
+        </div>
       </article>`).join("");
 
     return `
@@ -382,7 +386,7 @@
           ${feishu ? `<a class="btn btn--solid" href="${esc(feishu)}" target="_blank" rel="noopener">${esc(page.feishuLabel || "打开飞书合集")}</a>` : `<span class="btn btn--ghost" style="cursor:default">飞书链接待上传</span>`}
         </div>
       </div>
-      ${list}`;
+      <div class="work-list">${list}</div>`;
   }
 
   const RENDER = {

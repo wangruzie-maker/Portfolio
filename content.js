@@ -1,4 +1,4 @@
-/* Synced from portfolio edit pack 2026-08-06T02:52:14.568Z */
+/* Synced from portfolio edit pack 2026-08-06T03:52:40.721Z */
 window.DEFAULT_CONTENT = {
   "version": 3,
   "site": {
@@ -452,7 +452,7 @@ window.DEFAULT_CONTENT = {
         "日产 100+",
         "成本下降 70%+"
       ],
-      "demoNote": "公网已部署产品能力；此页为可交互 Demo（占位数据）。",
+      "demoNote": "公网已部署产品能力；此页为可交互 Demo（占位数据）。 公网：http://xingzhenworld.com/#/home",
       "demoUrl": "./demos/xingzhen/index.html",
       "demoLabel": "打开星阵试用",
       "images": [
@@ -476,7 +476,8 @@ window.DEFAULT_CONTENT = {
           "src": "assets/covers/detail/baidu-b1-3.jpg",
           "link": ""
         }
-      ]
+      ],
+      "publicUrl": "http://xingzhenworld.com/#/home"
     },
     {
       "id": "topic-ai",
@@ -617,7 +618,7 @@ window.DEFAULT_CONTENT = {
 };
 
 
-/* —— 本仓库增量：资源基址 + 星阵试用入口 —— */
+/* —— 本仓库增量：资源基址 + demo 路径 —— */
 window.ASSET_BASE = window.ASSET_BASE || "./";
 window.assetUrl = function assetUrl(src) {
   if (!src) return "";
@@ -634,12 +635,3 @@ window.demoUrl = function demoUrl(src) {
   }
   return window.assetUrl(src);
 };
-
-if (window.DEFAULT_CONTENT) {
-  const xz = (window.DEFAULT_CONTENT.tools || []).find(t => t.id === "xingzhen");
-  if (xz) {
-    xz.demoUrl = xz.demoUrl || "./demos/xingzhen/index.html";
-    xz.demoLabel = xz.demoLabel || "打开星阵试用";
-    xz.demoNote = xz.demoNote || "公网已部署产品能力；此页为可交互 Demo（占位数据）。";
-  }
-}
